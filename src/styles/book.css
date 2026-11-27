@@ -1,0 +1,97 @@
+/* הספר כאובייקט תלת-ממדי */
+.book {
+  container-type: inline-size;
+  width: 200px;
+  aspect-ratio: 2 / 3;
+  perspective: 1400px;
+}
+
+.book__body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transform: rotateY(22deg);
+}
+
+.book__front,
+.book__spine,
+.book__pages {
+  position: absolute;
+  top: 0;
+  height: 100%;
+}
+
+.book__front {
+  inset-inline: 0;
+  z-index: 2;
+  padding: 7cqi;
+  background: #fbf8f1;
+  border-radius: 1px 4px 4px 1px;
+  box-shadow:
+    inset 6px 0 8px -6px rgba(0, 0, 0, 0.25),
+    0 30px 40px -18px rgba(10, 8, 30, 0.6);
+  transform: translateZ(4.5cqi);
+}
+
+.book__front img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.book__frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6cqi;
+  height: 100%;
+  padding: 10cqi 8cqi;
+  border: 1.5px solid var(--night);
+  background: linear-gradient(180deg, #f7e7bd 0%, #f0cf86 55%, #e6b55e 100%);
+  text-align: center;
+  color: var(--ink);
+}
+
+.book__title {
+  font-family: var(--serif);
+  font-size: 15cqi;
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+.book__author {
+  font-family: var(--serif);
+  font-size: 7.5cqi;
+  font-weight: 500;
+}
+
+/* שדרה בצד ימין — ספר עברי נפתח מימין */
+.book__spine {
+  right: 0;
+  width: 9cqi;
+  background: linear-gradient(90deg, #d9d2c2, #f3efe6 60%, #e6dfcf);
+  transform-origin: right center;
+  transform: translateZ(4.5cqi) rotateY(90deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.book__spine span {
+  font-family: var(--serif);
+  font-size: 5cqi;
+  color: var(--ink);
+  writing-mode: vertical-rl;
+  white-space: nowrap;
+}
+
+.book__pages {
+  inset-inline: 0;
+  background: #eee6d3;
+  transform: translateZ(-4.5cqi);
+  box-shadow: 0 30px 50px -20px rgba(10, 8, 30, 0.55);
+}
+

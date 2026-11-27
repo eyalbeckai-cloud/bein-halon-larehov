@@ -1,0 +1,430 @@
+/* =========================================================
+   דף הנחיתה — כל מסך נפתח מתוך החלון של המסך הקודם
+   ========================================================= */
+
+.stage {
+  --slot-x: clamp(2rem, 9vw, 9rem);
+  --slot-w: clamp(230px, 25vw, 400px);
+  --slot-h: min(64svh, calc(var(--slot-w) * 1.55));
+  --slot-top: calc(50% - var(--slot-h) / 2 + 1.75rem);
+  --frame-w: 10px;
+  --mull-w: 7px;
+
+  position: relative;
+}
+
+/* ---------- מסך ---------- */
+.panel {
+  --gx: 50%;
+  --gy: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 100svh;
+  overflow: hidden;
+}
+
+.stage.is-stacked {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.stage.is-stacked .panel {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  will-change: clip-path;
+}
+
+.panel--text-start {
+  justify-content: flex-start;
+}
+
+.panel--text-end {
+  justify-content: flex-end;
+}
+
+.panel__inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.25rem;
+  width: min(36rem, calc(100% - var(--slot-x) * 2 - var(--slot-w) - 6rem));
+  margin-inline: var(--slot-x);
+  padding-top: var(--header-h);
+}
+
+/* ---------- צבעים לפי מסך. האור מרוכז במקום שבו החלון נפתח ---------- */
+.glow--end {
+  --gx: calc(var(--slot-x) + var(--slot-w) / 2);
+  --gy: calc(var(--slot-top) + var(--slot-h) / 2);
+}
+
+.glow--start {
+  --gx: calc(100% - var(--slot-x) - var(--slot-w) / 2);
+  --gy: calc(var(--slot-top) + var(--slot-h) / 2);
+}
+
+.panel--night {
+  color: var(--lamp);
+  background:
+    radial-gradient(circle at var(--gx) var(--gy), rgba(230, 181, 94, 0.55) 0, rgba(230, 181, 94, 0) 32vmax),
+    linear-gradient(180deg, var(--night) 0%, #25214a 100%);
+}
+
+.panel--hero {
+  background:
+    radial-gradient(ellipse 60% 40% at 30% 100%, rgba(230, 181, 94, 0.1), transparent),
+    linear-gradient(180deg, var(--night) 0%, #262250 100%);
+}
+
+.panel--gold {
+  color: var(--ink);
+  background: radial-gradient(circle at var(--gx) var(--gy), #fbe9bb 0, rgba(251, 233, 187, 0) 45vmax), var(--gold);
+}
+
+.panel--ochre {
+  color: var(--ink);
+  background: radial-gradient(circle at var(--gx) var(--gy), #f3cf86 0, rgba(243, 207, 134, 0) 45vmax), var(--ochre);
+}
+
+.panel--paper {
+  color: var(--ink);
+  background: radial-gradient(circle at var(--gx) var(--gy), #fff6dd 0, rgba(255, 246, 221, 0) 45vmax), var(--paper);
+}
+
+.panel--lamp {
+  color: var(--ink);
+  background: radial-gradient(circle at var(--gx) var(--gy), #fffaf0 0, rgba(255, 250, 240, 0) 45vmax), var(--lamp);
+}
+
+/* ---------- גאומטריית החלון ---------- */
+.geom {
+  position: absolute;
+  top: var(--slot-top);
+  width: var(--slot-w);
+  height: var(--slot-h);
+  border-top-left-radius: calc(var(--slot-w) / 2);
+  border-top-right-radius: calc(var(--slot-w) / 2);
+}
+
+.geom--end {
+  inset-inline-end: var(--slot-x);
+}
+
+.geom--start {
+  inset-inline-start: var(--slot-x);
+}
+
+/* החלון של המסך הנוכחי: מסגרת ואדן, מחוץ לאזור שנפתח */
+.window-slot {
+  z-index: 1;
+  box-shadow:
+    0 0 0 var(--frame-w) var(--frame),
+    0 40px 60px -30px rgba(15, 13, 36, 0.5);
+}
+
+.panel--night .window-slot {
+  box-shadow:
+    0 0 0 var(--frame-w) var(--frame),
+    0 0 160px 40px rgba(230, 181, 94, 0.2);
+}
+
+.window-slot::after {
+  content: '';
+  position: absolute;
+  inset-inline: -28px;
+  bottom: calc(-1 * var(--frame-w) - 12px);
+  height: 14px;
+  border-radius: 2px;
+  background: var(--frame);
+}
+
+/* בתוך החלון: שלבי המסגרת (צבע המסך הקודם) */
+.window-inset {
+  z-index: 1;
+  background:
+    linear-gradient(var(--mull), var(--mull)) 50% 0 / var(--mull-w) 100% no-repeat,
+    linear-gradient(var(--mull), var(--mull)) 0 calc(var(--slot-w) / 2) / 100% var(--mull-w) no-repeat;
+  transform-origin: 50% 60%;
+}
+
+/* בלי אנימציה (או כשהמשתמש ביקש להפחית תנועה): כל חלון מואר בפני עצמו */
+.stage:not(.is-stacked) .window-inset {
+  display: none;
+}
+
+.stage:not(.is-stacked) .window-slot {
+  background:
+    linear-gradient(var(--frame), var(--frame)) 50% 0 / var(--mull-w) 100% no-repeat,
+    linear-gradient(var(--frame), var(--frame)) 0 calc(var(--slot-w) / 2) / 100% var(--mull-w) no-repeat,
+    radial-gradient(circle at 50% 55%, #fff3cf 0, var(--gold) 75%);
+}
+
+.stage.is-stacked .book--static-only {
+  display: none;
+}
+
+/* ---------- טיפוגרפיה ---------- */
+.hero__title {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--step-4);
+  font-weight: 300;
+  line-height: 0.92;
+  letter-spacing: -0.015em;
+  color: var(--lamp);
+}
+
+.hero__title span:last-child {
+  padding-inline-start: 0.9em;
+}
+
+.hero__author {
+  font-size: var(--step-1);
+  font-weight: 500;
+  color: var(--gold);
+}
+
+.hero__lead {
+  max-width: 30rem;
+  font-size: var(--step-1);
+  line-height: 1.6;
+  color: rgba(247, 224, 166, 0.86);
+}
+
+.hero__hint {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  z-index: 2;
+  transform: translateX(-50%);
+  font-family: var(--sans);
+  font-size: var(--step--1);
+  color: var(--dust);
+  white-space: nowrap;
+}
+
+.hero__hint::after {
+  content: '';
+  display: block;
+  width: 1px;
+  height: 2.25rem;
+  margin: 0.5rem auto 0;
+  background: linear-gradient(var(--dust), transparent);
+}
+
+.chapter__title {
+  font-size: var(--step-3);
+  font-weight: 400;
+}
+
+.chapter__body {
+  max-width: 32rem;
+  font-size: var(--step-1);
+  line-height: 1.65;
+}
+
+.panel__inner > div[data-reveal] {
+  margin-top: 0.75rem;
+}
+
+.buy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1.25rem;
+}
+
+.buy__note {
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+/* ---------- המסך האחרון ---------- */
+.panel--finale {
+  justify-content: center;
+}
+
+.panel--finale .panel__inner {
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(2rem, 6vw, 6rem);
+  width: min(62rem, calc(100% - 3rem));
+  margin-inline: auto;
+}
+
+.finale__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+/* ---------- הספר בתוך החלון ---------- */
+.book--in-window {
+  position: absolute;
+  bottom: 5%;
+  left: 50%;
+  width: 56%;
+  transform: translateX(-50%);
+}
+
+.book--finale {
+  width: clamp(170px, 22vw, 300px);
+  flex-shrink: 0;
+}
+
+/* ---------- ניווט פרקים ---------- */
+.chapters-nav {
+  position: absolute;
+  top: 50%;
+  inset-inline-end: 1.1rem;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  transform: translateY(-50%);
+  color: var(--lamp);
+}
+
+[data-tone='light'] .chapters-nav {
+  color: var(--ink);
+}
+
+.chapters-nav__dot {
+  width: 11px;
+  height: 15px;
+  padding: 0;
+  border: 1.5px solid currentColor;
+  border-radius: 6px 6px 1px 1px;
+  background: transparent;
+  opacity: 0.55;
+  cursor: pointer;
+  transition:
+    opacity 0.2s,
+    background-color 0.2s;
+}
+
+.chapters-nav__dot:hover {
+  opacity: 1;
+}
+
+.chapters-nav__dot.is-active {
+  background: currentColor;
+  opacity: 1;
+}
+
+/* כותרת עליונה מתאימה את עצמה לצבע המסך */
+[data-tone='light'] .site-header__brand {
+  color: var(--ink);
+}
+
+[data-tone='light'] .btn--header {
+  background: var(--ink);
+  color: var(--lamp);
+}
+
+/* =========================================================
+   מובייל: הטקסט למעלה, החלון במרכז למטה
+   ========================================================= */
+@media (max-width: 800px) {
+  .stage {
+    --slot-w: clamp(110px, min(42vw, 20svh), 220px);
+    --slot-h: calc(var(--slot-w) * 1.5);
+    --slot-top: calc(100% - var(--slot-h) - max(5svh, 1.5rem) - env(safe-area-inset-bottom));
+    --frame-w: 7px;
+    --mull-w: 5px;
+  }
+
+  .geom--end,
+  .geom--start {
+    inset-inline: auto;
+    left: calc(50% - var(--slot-w) / 2);
+  }
+
+  .glow--end,
+  .glow--start {
+    --gx: 50%;
+  }
+
+  .panel {
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .panel__inner {
+    width: auto;
+    margin-inline: 1.5rem;
+    padding-top: calc(var(--header-h) + 0.75rem);
+    gap: 0.9rem;
+  }
+
+  .stage:not(.is-stacked) .panel {
+    padding-bottom: calc(var(--slot-h) + 12svh);
+  }
+
+  .hero__title {
+    font-size: clamp(3rem, 15vw, 4.5rem);
+  }
+
+  .chapter__title {
+    font-size: clamp(2rem, 9vw, 2.6rem);
+  }
+
+  .chapter__body,
+  .hero__lead {
+    font-size: 1.125rem;
+    line-height: 1.6;
+  }
+
+  .hero__hint,
+  .chapters-nav {
+    display: none;
+  }
+
+  .panel--finale {
+    align-items: center;
+  }
+
+  .panel--finale .panel__inner {
+    flex-direction: column;
+    align-items: center;
+    width: auto;
+    padding-top: var(--header-h);
+    text-align: center;
+  }
+
+  .panel--finale .finale__text {
+    align-items: center;
+  }
+
+  .panel--finale .buy {
+    flex-direction: column;
+  }
+
+  .book--finale {
+    width: clamp(120px, 34vw, 170px);
+  }
+
+  .window-slot::after {
+    inset-inline: -18px;
+    height: 10px;
+    bottom: calc(-1 * var(--frame-w) - 8px);
+  }
+}
+
+@media (max-width: 800px) and (max-height: 640px) {
+  .chapter__body,
+  .hero__lead {
+    font-size: 1rem;
+  }
+
+  .buy__note {
+    display: none;
+  }
+}

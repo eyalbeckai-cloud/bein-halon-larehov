@@ -1,0 +1,253 @@
+/* =========================================================
+   עמוד רכישה
+   ========================================================= */
+.checkout {
+  background:
+    radial-gradient(ellipse 70% 50% at 85% 20%, rgba(255, 246, 221, 0.7), transparent),
+    var(--paper);
+  color: var(--ink);
+}
+
+.checkout__grid {
+  display: grid;
+  grid-template-columns: minmax(16rem, 26rem) minmax(0, 34rem);
+  gap: clamp(2rem, 6vw, 6rem);
+  justify-content: center;
+  align-items: start;
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+/* ---------- הספר בחלון ---------- */
+.checkout__book {
+  position: sticky;
+  top: calc(var(--header-h) + 2rem);
+  text-align: center;
+}
+
+.checkout__arch {
+  display: grid;
+  place-items: end center;
+  aspect-ratio: 3 / 4;
+  padding-bottom: 12%;
+  border-radius: 50% 50% 6px 6px / 38% 38% 6px 6px;
+  background:
+    radial-gradient(circle at 50% 60%, rgba(230, 181, 94, 0.5) 0, rgba(230, 181, 94, 0) 60%),
+    var(--night);
+  box-shadow: 0 0 0 10px #0f0d24;
+}
+
+.book--checkout {
+  width: 52%;
+}
+
+.checkout__book-title {
+  margin-top: 1.75rem;
+  font-size: var(--step-2);
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.checkout__book-author {
+  margin-top: 0.35rem;
+  font-size: var(--step-1);
+}
+
+/* ---------- הזמנה ---------- */
+.checkout__order {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  font-family: var(--sans);
+}
+
+.checkout__title {
+  font-family: var(--serif);
+  font-size: var(--step-3);
+  font-weight: 300;
+}
+
+.delivery {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.delivery__legend {
+  margin-bottom: 0.75rem;
+  padding: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.delivery__option {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.9rem;
+  align-items: center;
+  padding: 1rem 1.15rem;
+  border: 1.5px solid rgba(34, 28, 59, 0.25);
+  border-radius: 10px;
+  background: rgba(255, 250, 240, 0.55);
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
+}
+
+.delivery__option:hover {
+  border-color: rgba(34, 28, 59, 0.55);
+}
+
+.delivery__option.is-selected {
+  border-color: var(--ink);
+  background: #fffaf0;
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+.delivery__option input {
+  width: 1.2rem;
+  height: 1.2rem;
+  margin: 0;
+  accent-color: var(--ink);
+}
+
+.delivery__option:has(input:focus-visible) {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.delivery__text {
+  display: flex;
+  flex-direction: column;
+}
+
+.delivery__label {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.delivery__note {
+  font-size: 0.95rem;
+  opacity: 0.75;
+}
+
+.delivery__price {
+  font-weight: 700;
+}
+
+.delivery__single {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+/* ---------- סיכום ---------- */
+.summary {
+  margin: 0;
+  border-top: 1px solid rgba(34, 28, 59, 0.2);
+}
+
+.summary__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid rgba(34, 28, 59, 0.2);
+}
+
+.summary dt,
+.summary dd {
+  margin: 0;
+}
+
+.summary__row--total {
+  border-bottom: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.checkout__eta {
+  font-weight: 600;
+}
+
+/* ---------- PayPal ---------- */
+.checkout__pay {
+  min-height: 3.5rem;
+}
+
+.paypal-placeholder {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.25rem;
+  border: 2px dashed rgba(34, 28, 59, 0.45);
+  border-radius: 10px;
+  background: rgba(255, 250, 240, 0.6);
+  line-height: 1.5;
+}
+
+.paypal-status {
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+  opacity: 0.8;
+}
+
+.paypal-status--error {
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  background: #f6d6c8;
+  color: #5a1d0c;
+  opacity: 1;
+}
+
+.checkout__notes {
+  margin: 0;
+  padding-inline-start: 1.1rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.checkout__notes li + li {
+  margin-top: 0.25rem;
+}
+
+.checkout__terms {
+  font-size: 0.95rem;
+}
+
+.checkout__terms a {
+  text-underline-offset: 0.2em;
+}
+
+/* ---------- מובייל ---------- */
+@media (max-width: 800px) {
+  .checkout__grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .checkout__book {
+    position: static;
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: 0 1.25rem;
+    align-items: center;
+    text-align: start;
+  }
+
+  .checkout__arch {
+    grid-row: span 2;
+    box-shadow: 0 0 0 6px #0f0d24;
+  }
+
+  .checkout__book-title {
+    margin-top: 0;
+    align-self: end;
+  }
+
+  .checkout__book-author {
+    align-self: start;
+  }
+}
