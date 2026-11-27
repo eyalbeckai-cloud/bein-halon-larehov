@@ -6,6 +6,7 @@ import Landing from './pages/Landing'
 import Checkout from './pages/Checkout'
 import ThankYou from './pages/ThankYou'
 import Terms from './pages/Terms'
+import Privacy from './pages/Privacy'
 import NotFound from './pages/NotFound'
 
 function ScrollToTop() {
@@ -21,12 +22,13 @@ export default function App() {
     <>
       <ScrollToTop />
       <Header />
-      <main id="main">
+      <main id="main" tabIndex={-1}>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/thank-you" element={<ThankYou />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

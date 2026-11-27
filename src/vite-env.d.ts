@@ -2,9 +2,9 @@
 
 interface ImportMetaEnv {
   readonly VITE_PAYPAL_CLIENT_ID?: string
-  readonly VITE_PAYPAL_BUTTON_SHIPPING?: string
-  readonly VITE_PAYPAL_BUTTON_PICKUP?: string
+  readonly VITE_SUPABASE_URL?: string
   readonly VITE_SITE_URL?: string
+  readonly VITE_HASH_ROUTER?: string
 }
 
 interface ImportMeta {

@@ -1,15 +1,20 @@
 /**
  * הטקסטים של דף הנחיתה, לפי הסדר.
  * כל פרק הוא מסך מלא שמתחלף בגלילה.
- * tone קובע את צבע הרקע: night | gold | ochre | paper | lamp
+ * tone קובע את צבע הרקע: white | sky | canal | grass | night
+ * scene = איור מתוך הכריכה (קובץ בתיקייה public/scenes). בלי scene — מסך טיפוגרפי.
  */
-export type Tone = 'night' | 'gold' | 'ochre' | 'paper' | 'lamp'
+export type Tone = 'white' | 'sky' | 'canal' | 'grass' | 'night' | 'red'
 
 export type Chapter = {
   id: string
   tone: Tone
   title: string
   body: string[]
+  scene?: string
+  sceneAlt?: string
+  /** איזה חלק באיור יישאר במרכז כשהוא נחתך (במובייל) */
+  sceneFocus?: string
 }
 
 export const hero = {
@@ -20,7 +25,7 @@ export const hero = {
 export const chapters: Chapter[] = [
   {
     id: 'meeting',
-    tone: 'gold',
+    tone: 'white',
     title: 'מפגש אחד בבית קפה',
     body: [
       'ד״ר שמואל בק לא שיער ששיחה עם חבר מתקופת לימודי הרפואה, במפגש מקרי בבית קפה בתל אביב, תחזיר אותו עשרות שנים לאחור.',
@@ -29,20 +34,24 @@ export const chapters: Chapter[] = [
   },
   {
     id: 'padua',
-    tone: 'ochre',
+    tone: 'canal',
     title: 'ימי הסטודנט בפאדובה',
-    body: [
-      'השיחה החזירה אותו אל פאדובה שבאיטליה, העיר שבה למד רפואה, ואל הסטודנט הצעיר שהיה אז.',
-    ],
+    body: ['השיחה החזירה אותו אל פאדובה שבאיטליה, העיר שבה למד רפואה, ואל הסטודנט הצעיר שהיה אז.'],
+    scene: 'scenes/padua.jpg',
+    sceneFocus: '50% 30%',
+    sceneAlt: 'איור מהכריכה: בתים עם גגות אדומים וגשר מעל תעלה',
   },
   {
     id: 'album',
-    tone: 'paper',
+    tone: 'grass',
     title: 'אלבום מכוסה אבק',
     body: [
       'כשחזר לדירתו, עדיין מהרהר במפגש, פתח את אלבום התמונות הישן. האלבום שכב מכוסה אבק באחת מפינות הדירה מאז סיום הלימודים.',
       'הוא דפדף בין הדפים, וכל צילום הצית סיפור נוסף.',
     ],
+    scene: 'scenes/doctor.jpg',
+    sceneFocus: '50% 45%',
+    sceneAlt: 'איור מהכריכה: רופא בחלוק לבן הולך בין שדות ועצים',
   },
   {
     id: 'writing',
@@ -52,20 +61,26 @@ export const chapters: Chapter[] = [
       'עד מהרה מצא את עצמו מול המחשב, מקליד את החוויות שליוו אותו מאז ועד היום.',
       'הדי המלחמה נשמעו ברקע, הכתיבה העמיקה והזיכרונות צפו בזה אחר זה, עד שהתגבשה ההחלטה להפוך אותם לספר.',
     ],
+    scene: 'scenes/writing.jpg',
+    sceneFocus: '50% 50%',
+    sceneAlt: 'איור מהכריכה: איש כותב ליד שולחן, מנורה וחלון',
   },
   {
     id: 'author',
-    tone: 'lamp',
+    tone: 'white',
     title: 'על המחבר',
     body: [
       'ד״ר שמואל בק הוא רופא אורתופד. את לימודי הרפואה עשה בפאדובה שבאיטליה.',
       '״בין חלון לרחוב״ הוא הסיפור שלו: מפגש אחד, אלבום אחד, ועשרות שנים של זיכרונות.',
     ],
+    scene: 'scenes/ortho.jpg',
+    sceneFocus: '50% 5%',
+    sceneAlt: 'איור מהכריכה: כניסה למחלקה עם השלט ״אורתופדיה״',
   },
 ]
 
 export const finale = {
-  tone: 'night' as Tone,
+  tone: 'red' as Tone,
   title: 'עותק מודפס, עד הבית',
   body: 'המשלוח עלינו. התשלום מאובטח דרך PayPal, אפשר גם בכרטיס אשראי.',
 }

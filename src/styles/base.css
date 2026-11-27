@@ -1,28 +1,38 @@
 /* =========================================================
-   טוקנים — הצבעים לקוחים מהכריכה: מסגרת אינדיגו-סגול וזהב
+   טוקנים — הצבעים לקוחים מהאיור שעל הכריכה:
+   שמיים, תעלה, דשא, וגגות אדומים
    ========================================================= */
 :root {
-  --night: #1d1a38;      /* הרחוב בלילה, מסגרת הכריכה */
-  --night-2: #2b2752;
-  --gold: #e6b55e;       /* זהב הכריכה */
-  --lamp: #f7e0a6;       /* אור מנורה */
-  --ochre: #cf9a45;      /* קירות פאדובה */
-  --paper: #ecdcb8;      /* נייר צילום ישן */
-  --ink: #221c3b;        /* דיו */
-  --dust: #aaa4c4;       /* טקסט משני על רקע לילה */
+  --white: #ffffff;
+  --sky: #d5e9f8;
+  --sky-deep: #8fc0e9;
+  --canal: #dcedf1;
+  --grass: #e6f1dc;
+  --night: #0e1b33;
+  --red: #b5402a;        /* גג אדום — צבע הפעולה */
+  --red-dark: #94321f;
+  --ink: #0f172a;
+  --muted: #475569;
+  --line: rgba(15, 23, 42, 0.12);
 
-  --serif: 'Frank Ruhl Libre', 'David', 'Times New Roman', serif;
-  --sans: 'Assistant', 'Arial Hebrew', 'Segoe UI', Arial, sans-serif;
+  --font: 'Rubik Variable', 'Rubik', 'Segoe UI', 'Arial Hebrew', Arial, sans-serif;
 
-  --step--1: 0.875rem;
-  --step-0: clamp(1.0625rem, 0.98rem + 0.35vw, 1.1875rem);
-  --step-1: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
-  --step-2: clamp(1.6rem, 1.3rem + 1.4vw, 2.4rem);
-  --step-3: clamp(2.3rem, 1.6rem + 3.2vw, 4.2rem);
-  --step-4: clamp(3.2rem, 1.8rem + 7vw, 8rem);
+  --step--1: 0.9375rem;
+  --step-0: 1.0625rem;
+  --step-1: clamp(1.125rem, 1.05rem + 0.35vw, 1.3125rem);
+  --step-2: clamp(1.5rem, 1.25rem + 1.1vw, 2.1rem);
+  --step-3: clamp(2.4rem, 1.5rem + 3.8vw, 5rem);
+  --step-4: clamp(3.4rem, 1.6rem + 7.5vw, 8.5rem);
 
-  --header-h: 4rem;
-  --arch: 1.6em 1.6em 0.35em 0.35em;
+  --header-h: 4.5rem;
+  --radius: 28px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* שכבות */
+  --z-panel: 1;
+  --z-progress: 30;
+  --z-header: 50;
+  --z-skip: 100;
 }
 
 *,
@@ -33,22 +43,22 @@
 
 html {
   -webkit-text-size-adjust: 100%;
-  scroll-behavior: auto;
 }
 
 body {
   margin: 0;
-  background: var(--night);
-  color: var(--lamp);
-  font-family: var(--serif);
+  background: var(--white);
+  color: var(--ink);
+  font-family: var(--font);
   font-size: var(--step-0);
-  line-height: 1.7;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+  overflow-x: clip;
 }
 
 img,
-svg {
+svg,
+canvas {
   display: block;
   max-width: 100%;
 }
@@ -57,8 +67,7 @@ h1,
 h2,
 h3 {
   margin: 0;
-  font-weight: 400;
-  line-height: 1.05;
+  line-height: 1;
   text-wrap: balance;
 }
 
@@ -72,9 +81,13 @@ a {
 }
 
 :focus-visible {
-  outline: 3px solid var(--gold);
+  outline: 3px solid var(--ink);
   outline-offset: 3px;
-  border-radius: 4px;
+  border-radius: 6px;
+}
+
+main:focus {
+  outline: none;
 }
 
 .visually-hidden {
@@ -90,12 +103,12 @@ a {
   position: fixed;
   top: 0.5rem;
   right: 0.5rem;
-  z-index: 100;
+  z-index: var(--z-skip);
   padding: 0.6rem 1rem;
-  background: var(--gold);
-  color: var(--ink);
-  font-family: var(--sans);
-  font-weight: 700;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--white);
+  font-weight: 600;
   transform: translateY(-200%);
 }
 
@@ -103,113 +116,131 @@ a {
   transform: none;
 }
 
-/* ---------- כפתורים: הקצה העליון מקושת כמו חלון ---------- */
+/* ---------- כפתורים ---------- */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75em;
+  gap: 0.6em;
   min-height: 3.25rem;
-  padding: 0.8rem 1.9rem 0.75rem;
+  padding: 0 1.75rem;
   border: 0;
-  border-radius: var(--arch);
-  font-family: var(--sans);
-  font-size: 1.125rem;
-  font-weight: 700;
-  line-height: 1.2;
+  border-radius: 999px;
+  font-family: var(--font);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1;
   text-decoration: none;
+  white-space: nowrap;
   cursor: pointer;
   transition:
-    background-color 0.2s,
-    color 0.2s,
-    transform 0.2s;
+    background-color 0.2s var(--ease),
+    color 0.2s var(--ease),
+    box-shadow 0.2s var(--ease);
 }
 
-.btn:active {
-  transform: translateY(1px);
+.btn--primary {
+  background: var(--red);
+  color: var(--white);
+  box-shadow: 0 10px 24px -12px rgba(181, 64, 42, 0.7);
 }
 
-.btn--gold {
-  background: var(--gold);
-  color: var(--ink);
-}
-
-.btn--gold:hover {
-  background: var(--lamp);
+.btn--primary:hover {
+  background: var(--red-dark);
 }
 
 .btn--ink {
   background: var(--ink);
-  color: var(--lamp);
+  color: var(--white);
 }
 
 .btn--ink:hover {
-  background: var(--night-2);
+  background: #1e293b;
 }
 
-.btn--ink:focus-visible {
-  outline-color: var(--ink);
+.btn--light {
+  background: var(--white);
+  color: var(--red);
+}
+
+.btn--light:hover {
+  background: #fff1ec;
+}
+
+.btn--light:focus-visible {
+  outline-color: var(--white);
 }
 
 .btn--small {
-  min-height: 2.5rem;
-  padding: 0.45rem 1.2rem 0.4rem;
-  font-size: 1rem;
+  min-height: 2.75rem;
+  padding: 0 1.15rem;
+  font-size: 0.975rem;
 }
 
 .btn__price {
-  font-weight: 600;
-  opacity: 0.75;
+  font-weight: 400;
+  opacity: 0.85;
 }
 
-/* ---------- כותרת עליונה ---------- */
+.btn__icon {
+  width: 1.15em;
+  height: 1.15em;
+  flex-shrink: 0;
+}
+
+/* ---------- כותרת צפה ---------- */
 .site-header {
   position: fixed;
-  inset: 0 0 auto 0;
-  z-index: 50;
+  top: 0.9rem;
+  inset-inline: 0.9rem;
+  z-index: var(--z-header);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: var(--header-h);
-  padding: 0 clamp(1rem, 3vw, 2.5rem);
-  color: var(--lamp);
-  pointer-events: none;
-}
-
-.site-header > * {
-  pointer-events: auto;
+  gap: 1rem;
+  max-width: 72rem;
+  height: 3.5rem;
+  margin-inline: auto;
+  padding-inline: 1.35rem 0.4rem;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+  box-shadow: 0 8px 30px -18px rgba(15, 23, 42, 0.45);
 }
 
 .site-header__brand {
-  font-family: var(--serif);
-  font-size: 1.25rem;
-  font-weight: 500;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   text-decoration: none;
-  color: var(--lamp);
-  transition: color 0.3s;
+  white-space: nowrap;
 }
 
-.site-header--solid {
-  background: var(--night);
-  box-shadow: 0 1px 0 rgba(247, 224, 166, 0.12);
+.site-header__author {
+  font-weight: 400;
+  color: var(--muted);
 }
 
-.btn--header {
-  transition:
-    background-color 0.3s,
-    color 0.3s;
+.site-header__progress {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 3px;
+  background: var(--red);
+  transform: scaleX(var(--progress, 0));
+  transform-origin: right;
 }
 
 /* ---------- תחתית ---------- */
 .site-footer {
   position: relative;
-  z-index: 1;
-  padding: 3rem clamp(1rem, 4vw, 3rem) 2.5rem;
-  background: var(--night);
-  color: var(--dust);
-  font-family: var(--sans);
+  z-index: var(--z-panel);
+  padding: 2.5rem clamp(1rem, 4vw, 3rem);
+  background: var(--ink);
+  color: #cbd5e1;
   font-size: var(--step--1);
-  border-top: 1px solid rgba(247, 224, 166, 0.12);
 }
 
 .site-footer__inner {
@@ -229,19 +260,18 @@ a {
 }
 
 .site-footer a {
-  color: var(--lamp);
+  color: var(--white);
   text-underline-offset: 0.2em;
 }
 
-/* ---------- עמודי תוכן רגילים (רכישה, תודה, תקנון) ---------- */
+/* ---------- עמודי תוכן רגילים (תודה, תקנון) ---------- */
 .page {
   min-height: 100svh;
-  padding: calc(var(--header-h) + 2.5rem) clamp(1rem, 4vw, 3rem) 4rem;
+  padding: calc(var(--header-h) + 3rem) clamp(1rem, 4vw, 3rem) 4rem;
 }
 
-.page--paper {
-  background: var(--paper);
-  color: var(--ink);
+.page--soft {
+  background: var(--canal);
 }
 
 .prose {
@@ -251,7 +281,8 @@ a {
 
 .prose h1 {
   font-size: var(--step-3);
-  font-weight: 300;
+  font-weight: 700;
+  letter-spacing: -0.025em;
   margin-bottom: 1.5rem;
 }
 
@@ -264,6 +295,7 @@ a {
 .prose p,
 .prose li {
   margin-bottom: 0.75rem;
+  color: #1e293b;
 }
 
 .prose ul {
@@ -271,9 +303,14 @@ a {
 }
 
 .fill-me {
-  background: rgba(207, 154, 69, 0.35);
+  background: #fde68a;
   padding: 0 0.3em;
-  border-radius: 3px;
-  font-family: var(--sans);
+  border-radius: 4px;
   font-size: 0.9em;
+}
+
+@media (max-width: 600px) {
+  .site-header__author {
+    display: none;
+  }
 }

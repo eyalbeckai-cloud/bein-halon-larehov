@@ -2,55 +2,51 @@
    עמוד רכישה
    ========================================================= */
 .checkout {
-  background:
-    radial-gradient(ellipse 70% 50% at 85% 20%, rgba(255, 246, 221, 0.7), transparent),
-    var(--paper);
-  color: var(--ink);
+  background: linear-gradient(180deg, #eef6fc 0%, var(--white) 60%);
 }
 
 .checkout__grid {
   display: grid;
-  grid-template-columns: minmax(16rem, 26rem) minmax(0, 34rem);
-  gap: clamp(2rem, 6vw, 6rem);
+  grid-template-columns: minmax(16rem, 25rem) minmax(0, 32rem);
+  gap: clamp(2rem, 6vw, 5rem);
   justify-content: center;
   align-items: start;
   max-width: 72rem;
   margin: 0 auto;
 }
 
-/* ---------- הספר בחלון ---------- */
+/* ---------- הספר ---------- */
 .checkout__book {
   position: sticky;
   top: calc(var(--header-h) + 2rem);
-  text-align: center;
 }
 
 .checkout__arch {
   display: grid;
-  place-items: end center;
-  aspect-ratio: 3 / 4;
-  padding-bottom: 12%;
-  border-radius: 50% 50% 6px 6px / 38% 38% 6px 6px;
-  background:
-    radial-gradient(circle at 50% 60%, rgba(230, 181, 94, 0.5) 0, rgba(230, 181, 94, 0) 60%),
-    var(--night);
-  box-shadow: 0 0 0 10px #0f0d24;
+  place-items: center;
+  aspect-ratio: 4 / 5;
+  border-radius: 999px 999px var(--radius) var(--radius);
+  background: linear-gradient(180deg, #e8f3fc 0%, var(--sky) 60%, #b4d5f0 100%);
+  box-shadow: inset 0 0 0 1px var(--line);
 }
 
 .book--checkout {
-  width: 52%;
+  width: 50%;
+  margin-top: 8%;
 }
 
 .checkout__book-title {
-  margin-top: 1.75rem;
+  margin-top: 1.5rem;
   font-size: var(--step-2);
-  font-weight: 500;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   line-height: 1.1;
 }
 
 .checkout__book-author {
-  margin-top: 0.35rem;
+  margin-top: 0.25rem;
   font-size: var(--step-1);
+  color: var(--muted);
 }
 
 /* ---------- הזמנה ---------- */
@@ -58,13 +54,17 @@
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
-  font-family: var(--sans);
+  padding: clamp(1.25rem, 3vw, 2.25rem);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--white);
+  box-shadow: 0 30px 60px -40px rgba(15, 23, 42, 0.35);
 }
 
 .checkout__title {
-  font-family: var(--serif);
   font-size: var(--step-3);
-  font-weight: 300;
+  font-weight: 800;
+  letter-spacing: -0.04em;
 }
 
 .delivery {
@@ -75,11 +75,12 @@
   border: 0;
 }
 
-.delivery__legend {
+.checkout__legend {
+  display: block;
   margin-bottom: 0.75rem;
   padding: 0;
-  font-size: 1.125rem;
-  font-weight: 700;
+  font-size: 1.0625rem;
+  font-weight: 600;
 }
 
 .delivery__option {
@@ -87,31 +88,33 @@
   grid-template-columns: auto 1fr auto;
   gap: 0.9rem;
   align-items: center;
-  padding: 1rem 1.15rem;
-  border: 1.5px solid rgba(34, 28, 59, 0.25);
-  border-radius: 10px;
-  background: rgba(255, 250, 240, 0.55);
+  min-height: 4.25rem;
+  padding: 0.9rem 1.1rem;
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
+  background: var(--white);
   cursor: pointer;
   transition:
-    border-color 0.2s,
-    background-color 0.2s;
+    border-color 0.2s var(--ease),
+    background-color 0.2s var(--ease);
 }
 
 .delivery__option:hover {
-  border-color: rgba(34, 28, 59, 0.55);
+  border-color: rgba(15, 23, 42, 0.35);
 }
 
 .delivery__option.is-selected {
   border-color: var(--ink);
-  background: #fffaf0;
+  background: #f8fafc;
   box-shadow: inset 0 0 0 1px var(--ink);
 }
 
 .delivery__option input {
-  width: 1.2rem;
-  height: 1.2rem;
+  width: 1.25rem;
+  height: 1.25rem;
   margin: 0;
-  accent-color: var(--ink);
+  accent-color: var(--red);
+  cursor: pointer;
 }
 
 .delivery__option:has(input:focus-visible) {
@@ -125,36 +128,258 @@
 }
 
 .delivery__label {
-  font-size: 1.125rem;
-  font-weight: 700;
+  font-size: 1.0625rem;
+  font-weight: 600;
 }
 
 .delivery__note {
   font-size: 0.95rem;
-  opacity: 0.75;
+  color: var(--muted);
 }
 
 .delivery__price {
-  font-weight: 700;
+  font-weight: 600;
+  color: #15803d;
 }
 
 .delivery__single {
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+/* ---------- כמות ---------- */
+.qty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.qty .checkout__legend {
+  margin: 0;
+}
+
+.qty__control {
+  display: inline-flex;
+  align-items: center;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+}
+
+.qty__btn {
+  display: grid;
+  place-items: center;
+  width: 2.9rem;
+  height: 2.9rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.2s var(--ease);
+}
+
+.qty__btn svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.qty__btn:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.qty__btn:disabled {
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.qty__value {
+  min-width: 2rem;
   font-size: 1.125rem;
   font-weight: 600;
+  text-align: center;
+}
+
+/* ---------- שדות ---------- */
+.fields {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.fields__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.fields__row--street {
+  grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.field__label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.field__opt {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.field__input {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0 0.95rem;
+  border: 1.5px solid rgba(15, 23, 42, 0.18);
+  border-radius: 12px;
+  background: var(--white);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 1rem;
+  transition:
+    border-color 0.2s var(--ease),
+    box-shadow 0.2s var(--ease);
+}
+
+.field__input[dir='ltr'] {
+  text-align: right;
+}
+
+.field__input:hover {
+  border-color: rgba(15, 23, 42, 0.35);
+}
+
+.field__input:focus {
+  outline: none;
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.12);
+}
+
+.field.has-error .field__input {
+  border-color: #dc2626;
+}
+
+.field__error {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #b91c1c;
+}
+
+/* שדה מלכודת לבוטים */
+.hp {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- הסכמה ---------- */
+.consent__label {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  font-size: 0.975rem;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.consent__label input {
+  flex-shrink: 0;
+  width: 1.3rem;
+  height: 1.3rem;
+  margin: 0.1rem 0 0;
+  accent-color: var(--red);
+  cursor: pointer;
+}
+
+.consent__label a {
+  text-underline-offset: 0.2em;
+}
+
+.consent .field__error {
+  margin-top: 0.35rem;
+  margin-inline-start: 2rem;
+}
+
+.checkout__notice {
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  font-size: 0.975rem;
+}
+
+.checkout__notice--error {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.checkout__notice--info {
+  background: #eff6ff;
+  color: #1e3a8a;
+}
+
+.checkout__busy {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.spinner {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 3px solid rgba(15, 23, 42, 0.15);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.5s;
+  }
 }
 
 /* ---------- סיכום ---------- */
 .summary {
   margin: 0;
-  border-top: 1px solid rgba(34, 28, 59, 0.2);
 }
 
 .summary__row {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.8rem 0;
-  border-bottom: 1px solid rgba(34, 28, 59, 0.2);
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--line);
+  color: #334155;
 }
 
 .summary dt,
@@ -164,8 +389,10 @@
 
 .summary__row--total {
   border-bottom: 0;
-  font-size: 1.35rem;
+  padding-top: 1rem;
+  font-size: 1.375rem;
   font-weight: 700;
+  color: var(--ink);
 }
 
 .checkout__eta {
@@ -182,42 +409,56 @@
   flex-direction: column;
   gap: 0.35rem;
   padding: 1.25rem;
-  border: 2px dashed rgba(34, 28, 59, 0.45);
-  border-radius: 10px;
-  background: rgba(255, 250, 240, 0.6);
+  border: 2px dashed rgba(15, 23, 42, 0.25);
+  border-radius: 16px;
+  background: #f8fafc;
   line-height: 1.5;
 }
 
 .paypal-status {
   margin-bottom: 0.75rem;
   font-size: 0.95rem;
-  opacity: 0.8;
+  color: var(--muted);
 }
 
 .paypal-status--error {
   padding: 0.85rem 1rem;
-  border-radius: 8px;
-  background: #f6d6c8;
-  color: #5a1d0c;
-  opacity: 1;
+  border-radius: 12px;
+  background: #fef2f2;
+  color: #991b1b;
 }
 
 .checkout__notes {
+  display: grid;
+  gap: 0.4rem;
   margin: 0;
-  padding-inline-start: 1.1rem;
+  padding: 0;
+  list-style: none;
   font-size: 0.95rem;
-  line-height: 1.6;
+  color: #334155;
 }
 
-.checkout__notes li + li {
-  margin-top: 0.25rem;
+.checkout__notes li {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.checkout__notes svg {
+  flex-shrink: 0;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.2rem;
+  color: #15803d;
 }
 
 .checkout__terms {
   font-size: 0.95rem;
+  color: var(--muted);
 }
 
 .checkout__terms a {
+  color: var(--ink);
   text-underline-offset: 0.2em;
 }
 
@@ -225,21 +466,19 @@
 @media (max-width: 800px) {
   .checkout__grid {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 1.5rem;
   }
 
   .checkout__book {
     position: static;
     display: grid;
-    grid-template-columns: 7rem 1fr;
-    gap: 0 1.25rem;
+    grid-template-columns: 6.5rem 1fr;
+    gap: 0 1.1rem;
     align-items: center;
-    text-align: start;
   }
 
   .checkout__arch {
     grid-row: span 2;
-    box-shadow: 0 0 0 6px #0f0d24;
   }
 
   .checkout__book-title {
@@ -249,5 +488,14 @@
 
   .checkout__book-author {
     align-self: start;
+  }
+
+  .fields__row,
+  .fields__row--street {
+    grid-template-columns: 1fr;
+  }
+
+  .fields__row--street {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   }
 }

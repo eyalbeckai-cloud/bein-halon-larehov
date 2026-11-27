@@ -1,7 +1,10 @@
 # בין חלון לרחוב — אתר הספר
 
 דף נחיתה ועמוד רכישה לספר של ד״ר שמואל בק.
-האתר סטטי, ללא שרת: GitHub Pages מארח אותו בחינם, ו-PayPal מטפל בתשלום.
+
+- **האתר** — סטטי, מתארח בחינם ב-GitHub Pages ועולה אוטומטית ב-GitHub Actions.
+- **התשלום** — PayPal (חשבון PayPal או כרטיס אשראי).
+- **ההזמנות** — נשמרות ב-Supabase. פונקציית שרת קטנה (Edge Function) פותחת את התשלום, מוודאת מול PayPal שהוא עבר ובסכום הנכון, ורק אז מסמנת את ההזמנה כ״שולמה״.
 
 ---
 
@@ -9,169 +12,161 @@
 
 | קובץ / תיקייה | מה זה |
 |---|---|
-| `src/config.ts` | **כל ההגדרות**: מחיר, איסוף עצמי, פרטי העסק, PayPal |
-| `src/content/chapters.ts` | **כל הטקסטים** של דף הנחיתה |
-| `src/pages/Landing.tsx` | דף הנחיתה והאנימציות (GSAP) |
-| `src/pages/Checkout.tsx` | עמוד הרכישה (`/checkout`) |
-| `src/pages/Terms.tsx` | תקנון ומדיניות ביטולים (`/terms`) |
-| `src/pages/ThankYou.tsx` | עמוד תודה אחרי תשלום (`/thank-you`) |
-| `public/` | תמונות: אייקון, תמונת שיתוף לוואטסאפ, וכריכה (אם תוסיף) |
+| `src/config.ts` | **הגדרות**: מחיר, איסוף עצמי, פרטי העסק |
+| `src/content/chapters.ts` | **הטקסטים** של דף הנחיתה |
+| `src/pages/Checkout.tsx` | עמוד הרכישה: טופס פרטים + כפתורי PayPal |
+| `src/pages/Terms.tsx`, `src/pages/Privacy.tsx` | תקנון ומדיניות פרטיות |
+| `supabase/schema.sql` | **ה-SQL** שמקים את טבלת ההזמנות |
+| `supabase/functions/checkout/index.ts` | **פונקציית השרת** (נפתחת ב-Supabase) |
+| `public/` | כריכה, איורים, אייקון ותמונת שיתוף |
 | `.github/workflows/deploy.yml` | בנייה והעלאה אוטומטית ל-GitHub Pages |
+
+### איך הזמנה עובדת
+1. הקונה ממלא פרטים (שם, טלפון, מייל, כתובת) ומאשר תקנון ופרטיות.
+2. לוחץ על PayPal או על ״כרטיס אשראי״ ← הפונקציה שומרת את ההזמנה כ-`pending` ופותחת תשלום ב-PayPal **במחיר שנקבע בשרת**.
+3. אחרי האישור ב-PayPal ← הפונקציה גובה, בודקת שהסכום נכון, ומסמנת `paid`.
+4. הקונה רואה עמוד תודה עם מספר הזמנה (מ-1001 והלאה).
 
 ---
 
-## שלב 1 — הרצה במחשב (לא חובה, אבל מומלץ)
+## שלב 1 — הרצה במחשב (לא חובה)
 
-1. התקן Node.js בגרסת LTS (22 ומעלה) מ-https://nodejs.org.
-2. פתח טרמינל בתיקיית הפרויקט (ב-VS Code: ‏Terminal ← New Terminal).
-3. הרץ:
+1. Node.js בגרסה 22 ומעלה (https://nodejs.org).
+2. בטרמינל בתיקיית הפרויקט:
    ```bash
    npm install
    npm run dev
    ```
-4. פתח בדפדפן את הכתובת שמופיעה (בדרך כלל http://localhost:5173).
-
-לבדיקה שהבנייה עוברת בדיוק כמו בגיטהאב: `npm run build`.
+3. לפתוח את הכתובת שמופיעה (בדרך כלל http://localhost:5173).
 
 ---
 
-## שלב 2 — העלאה לגיטהאב
+## שלב 2 — גיטהאב ו-GitHub Pages
 
-1. היכנס ל-https://github.com/new.
-2. שם הריפו: למשל `bein-halon-larehov`.
-3. בחר **Public**. (בחשבון GitHub חינמי, Pages עובד רק בריפו ציבורי.)
-4. **אל** תסמן README, ‏‎.gitignore או License — הם כבר בפרויקט.
-5. לחץ **Create repository**.
-6. בטרמינל, בתיקיית הפרויקט:
-   ```bash
-   git init
-   git add .
-   git commit -m "אתר הספר בין חלון לרחוב"
-   git branch -M main
-   git remote add origin https://github.com/<שם-המשתמש>/bein-halon-larehov.git
-   git push -u origin main
-   ```
-   (מחליפים את `<שם-המשתמש>` בשם המשתמש שלך בגיטהאב.)
-
----
-
-## שלב 3 — הפעלת GitHub Pages
-
-1. בריפו: **Settings ← Pages**.
-2. תחת **Build and deployment ← Source** בחר **GitHub Actions**.
-3. עבור ללשונית **Actions**. תראה ריצה בשם **Deploy to GitHub Pages**.
-   - אם הריצה הראשונה נכשלה (זה קורה כשהיא רצה לפני שהפעלת את Pages): לחץ עליה ← **Re-run all jobs**.
-4. כשהריצה ירוקה, האתר זמין בכתובת:
+1. ריפו **ציבורי** בגיטהאב, והעלאת הקוד (`git push`).
+2. בריפו: **Settings ← Pages ← Source ← GitHub Actions**.
+3. בלשונית **Actions** הריצה צריכה להיות ירוקה. האתר זמין ב:
    `https://<שם-המשתמש>.github.io/bein-halon-larehov/`
 
-מעכשיו כל `git push` לענף `main` מעדכן את האתר אוטומטית תוך דקה-שתיים.
-
-> בשלב הזה עמוד הרכישה מציג מסגרת מקווקוות: ״כאן יופיע כפתור התשלום של PayPal״. זה תקין — מחברים את PayPal בשלב הבא.
+מעכשיו כל `git push` מעדכן את האתר.
 
 ---
 
-## שלב 4 — חיבור PayPal
+## שלב 3 — Supabase: טבלת ההזמנות
 
-### 4.1 חשבון עסקי
-1. פתח חשבון **PayPal Business** (או שדרג חשבון קיים) וקשר אליו חשבון בנק.
-2. השלם את אימות החשבון ש-PayPal מבקשים.
+1. ב-Supabase פתח את הפרויקט ← **SQL Editor ← New query**.
+2. הדבק את **כל** התוכן של `supabase/schema.sql` ← **Run**.
+3. ב-**Table Editor** תופיע טבלה בשם `orders`.
 
-### 4.2 אפשר תשלום בכרטיס אשראי בלי חשבון PayPal
-**Account Settings ← Website payments ← Website preferences ← Update ← PayPal account optional ← On**
+> הטבלה נעולה: אף אחד מהאינטרנט לא יכול לקרוא או לכתוב אליה. רק פונקציית השרת (עם המפתח הסודי שנמצא אצל Supabase) כותבת אליה, ורק אתה רואה אותה בלוח הבקרה.
 
-> גם כשזה פעיל, PayPal מחליטים לכל קונה אם להציג תשלום כאורח (לפי בדיקת סיכון, מדינה, ואם המייל כבר קשור לחשבון PayPal).
+---
 
-### 4.3 יצירת הכפתורים
-ב-PayPal: **Pay links and buttons ← Create** (בתפריט Sales / Tools — המיקום משתנה מעט בין גרסאות).
+## שלב 4 — PayPal: אפליקציה (Client ID + Secret)
 
-**כפתור 1 — משלוח עד הבית**
-- Product name: `בין חלון לרחוב — משלוח עד הבית`
-- Price: `84`, Currency: **ILS** (שקל)
-- Shipping fee: `0`
-- כתובת למשלוח: **לאסוף** (Collect shipping address)
-- סוג ההטמעה: **Stacked buttons** (הקוד עם `<script>`), לא ״HTML only״.
+1. חשבון **PayPal Business** עם חשבון בנק מקושר.
+2. **Account Settings ← Website payments ← Website preferences ← PayPal account optional ← On** (כדי לאפשר תשלום בכרטיס בלי חשבון PayPal).
+3. היכנס ל-https://developer.paypal.com ← **Apps & Credentials**.
+4. **בדיקות קודם (מומלץ):** בחר למעלה **Sandbox** ← **Create App**. תקבל **Client ID** ו-**Secret** של סביבת בדיקות.
+5. **לאוויר:** אותו דבר תחת **Live**.
 
-**כפתור 2 — איסוף עצמי** (רק אם השארת איסוף עצמי פעיל ב-`config.ts`)
-- Product name: `בין חלון לרחוב — איסוף עצמי`
-- Price: `84`, Currency: **ILS**
-- כתובת למשלוח: **לא לאסוף** (Do not collect shipping address)
+> ה-**Client ID** ציבורי (נכנס לאתר). ה-**Secret** סודי — הוא נכנס **רק** ל-Supabase (שלב 5), לעולם לא לקוד ולא לגיטהאב.
 
-> שמות המוצרים הם הדרך שלך לדעת מה הקונה בחר: כל עסקה ב-PayPal תציג ״משלוח עד הבית״ (עם כתובת) או ״איסוף עצמי״.
+---
 
-אם יש בהגדרות הכפתור אפשרות להפנות לכתובת אחרי תשלום, הגדר:
-`https://<שם-המשתמש>.github.io/bein-halon-larehov/thank-you/`
+## שלב 5 — Supabase: פונקציית השרת
 
-### 4.4 העתקת המזהים מהקוד ש-PayPal נותנים
-הקוד נראה בערך כך:
-```html
-<script src="https://www.paypal.com/sdk/js?client-id=AbC123...&components=hosted-buttons&..."></script>
-...
-paypal.HostedButtons({ hostedButtonId: "XYZ789..." }).render("#paypal-container-XYZ789...")
-```
-- הערך אחרי `client-id=` (עד ה-`&`) הוא ה-**Client ID**.
-- הערך של `hostedButtonId` הוא **מזהה הכפתור**. לכל כפתור מזהה משלו.
-
-**לא מדביקים את הקוד באתר** — האתר כבר יודע לטעון את הכפתור. צריך רק את המזהים.
-
-### 4.5 הכנסת המזהים לגיטהאב (כ-Secrets)
-בריפו: **Settings ← Secrets and variables ← Actions ← לשונית Secrets ← New repository secret**.
-צור שלושה Secrets (השם חייב להיות בדיוק כך, באותיות גדולות):
+### 5.1 הגדרת הסודות
+ב-Supabase: **Edge Functions ← Secrets** (או Project Settings ← Edge Functions) ← הוסף:
 
 | Name | Value |
 |---|---|
-| `PAYPAL_CLIENT_ID` | ה-Client ID |
-| `PAYPAL_BUTTON_SHIPPING` | מזהה הכפתור של משלוח עד הבית |
-| `PAYPAL_BUTTON_PICKUP` | מזהה הכפתור של איסוף עצמי (או לא ליצור, אם אין איסוף) |
+| `PAYPAL_CLIENT_ID` | ה-Client ID מ-PayPal |
+| `PAYPAL_CLIENT_SECRET` | ה-Secret מ-PayPal |
+| `PAYPAL_ENV` | `sandbox` לבדיקות, `live` לאוויר |
+| `ALLOWED_ORIGINS` | `https://eyalbeckai-cloud.github.io` (הכתובת של האתר, בלי סלאש בסוף) |
 
-> ה-Secrets מוסתרים בהגדרות הריפו ובלוגים של Actions. שים לב: Client ID ומזהי הכפתורים עדיין יופיעו בקוד של האתר החי — כך PayPal עובד בכל אתר, וזה בטוח.
-> **לעולם אל תכניס את ה-Secret key של PayPal** (המפתח הסודי של האפליקציה) — האתר לא צריך אותו.
+לא צריך להגדיר `SUPABASE_URL` או מפתחות — Supabase מזריקים אותם לבד.
 
-### 4.6 פרסום מחדש
-**Actions ← Deploy to GitHub Pages ← Run workflow**.
-אחרי שהריצה ירוקה — היכנס ל-`/checkout` באתר ובדוק שהכפתור מופיע.
+### 5.2 פרסום הפונקציה — דרך האתר של Supabase (הכי פשוט)
+1. **Edge Functions ← Deploy a new function ← Via Editor**.
+2. שם הפונקציה: `checkout` (בדיוק כך).
+3. מחק את הקוד לדוגמה והדבק את **כל** התוכן של `supabase/functions/checkout/index.ts` ← **Deploy**.
+4. בהגדרות הפונקציה **כבה** את **Verify JWT** (״Enforce JWT verification״). האתר קורא לפונקציה בלי התחברות; ההגנה היא בדיקת הכתובת (`ALLOWED_ORIGINS`), בדיקת הפרטים, והמחיר שנקבע בשרת.
 
-### 4.7 בדיקה לפני מכירה אמיתית (מומלץ)
-- הכי פשוט: קנה עותק אחד בעצמך בכרטיס אשראי, ובצע החזר (Refund) מתוך PayPal. שים לב: בדרך כלל PayPal לא מחזירים את העמלה על עסקה שהוחזרה (כ-4.8 ₪).
-- נסה גם מהנייד, בחלון גלישה בסתר, עם מייל שלא קשור ל-PayPal — כדי לראות את מסלול התשלום כאורח.
-
-### לבדיקה במחשב
-העתק את `.env.example` לקובץ בשם `.env.local`, מלא בו את אותם ערכים, והרץ `npm run dev`.
+### 5.2 (חלופה) — דרך הטרמינל
+```bash
+npx supabase login
+npx supabase link --project-ref <PROJECT_REF>
+npx supabase functions deploy checkout --no-verify-jwt
+```
+`PROJECT_REF` = החלק הראשון בכתובת הפרויקט (`https://<PROJECT_REF>.supabase.co`).
 
 ---
 
-## שלב 5 — לפני שמפרסמים את האתר
+## שלב 6 — GitHub Secrets (לאתר)
 
-1. **פרטי העסק** — ב-`src/config.ts`, תחת `business`: שם, מספר עוסק, מייל, טלפון, כתובת.
-   כל עוד הם ריקים, עמוד התקנון מציג סימון צהוב ״[למלא...]״.
-2. **זמן אספקה** — `delivery.deliveryTime`, למשל `'עד 7 ימי עסקים'`.
-3. **איסוף עצמי** — אם אין: `delivery.pickup.enabled: false`.
-4. **תקנון** — עמוד `/terms` הוא תבנית. כדאי שעו״ד או רו״ח יעברו עליו, במיוחד סעיף הביטולים.
-5. **קבלות** — PayPal לא מפיקים קבלה לפי החוק בישראל. צריך להפיק קבלה לכל מכירה בנפרד (בתוכנת הנהלת חשבונות).
+בריפו: **Settings ← Secrets and variables ← Actions ← Secrets ← New repository secret**:
 
-אחרי כל שינוי: `git add . && git commit -m "עדכון" && git push`.
+| Name | Value |
+|---|---|
+| `PAYPAL_CLIENT_ID` | ה-Client ID (אותו אחד כמו ב-Supabase — sandbox או live בהתאם) |
+| `SUPABASE_URL` | `https://<PROJECT_REF>.supabase.co` (ב-Supabase: Project Settings ← API ← Project URL) |
+
+אחר כך: **Actions ← Deploy to GitHub Pages ← Run workflow**.
+
+> אם נשארו אצלך Secrets ישנים בשם `PAYPAL_BUTTON_SHIPPING` / `PAYPAL_BUTTON_PICKUP` — אפשר למחוק, כבר לא בשימוש.
+
+---
+
+## שלב 7 — בדיקה
+
+### עם Sandbox (בלי כסף אמיתי)
+1. Supabase: `PAYPAL_ENV = sandbox` + Client ID/Secret של Sandbox. גיטהאב: Client ID של Sandbox.
+2. ב-developer.paypal.com ← **Sandbox accounts** יש חשבון קונה לבדיקות (Personal). אפשר גם לשלם בכרטיס בדיקה מ-https://developer.paypal.com/tools/sandbox/card-testing/.
+3. בצע הזמנה באתר ← בדוק ב-Supabase שבטבלה `orders` השורה עם `status = paid`.
+
+### מעבר לאוויר
+החלף בשלושה מקומות: Supabase ← `PAYPAL_ENV = live` + Client ID/Secret של Live; גיטהאב ← `PAYPAL_CLIENT_ID` של Live; ואז **Run workflow**.
+מומלץ לבצע קנייה אמיתית אחת ולהחזיר אותה (Refund) ב-PayPal. שים לב: בדרך כלל PayPal לא מחזירים את העמלה על עסקה שהוחזרה.
+
+---
+
+## איפה רואים את ההזמנות
+
+ב-Supabase ← **Table Editor**:
+- `orders` — כל ההזמנות (כולל `pending` שלא שולמו).
+- `orders_to_ship` — שולמו ומחכות למשלוח, עם הכתובת.
+- `orders_to_pickup` — שולמו ומחכות לאיסוף.
+- `sales_summary` — כמה הזמנות, כמה ספרים, כמה כסף.
+
+אחרי ששלחת ספר — ב-SQL Editor:
+```sql
+update public.orders set status = 'shipped', shipped_at = now() where order_number = 1001;
+```
+
+מצבים: `pending` (נפתח, לא שולם) · `paid` (שולם) · `payment_review` (שולם אבל חריג — לבדוק ב-PayPal) · `failed` · `shipped` · `cancelled` · `refunded`.
+
+---
+
+## לפני שמפרסמים (משפטי — לא ייעוץ משפטי)
+
+1. **פרטי העסק** — ב-`src/config.ts` ← `business` (שם, מספר עוסק, מייל, טלפון, כתובת). כל עוד ריקים, התקנון ומדיניות הפרטיות מציגים סימון צהוב.
+2. **זמן אספקה** — `delivery.deliveryTime`.
+3. **תקנון** (`/terms`) **ומדיניות פרטיות** (`/privacy`) — אלה תבניות. הקונה מאשר אותם בתיבת סימון לפני התשלום, והמועד נשמר בהזמנה. כדאי שעו״ד יעבור עליהם.
+4. **קבלות** — PayPal לא מפיקים קבלה לפי החוק בישראל. צריך להפיק קבלה לכל מכירה (בתוכנת הנהלת חשבונות).
+5. **מידע אישי** — אל תייצא את הטבלה לקבצים ששוכבים סתם במחשב/בוואטסאפ, ומחק הזמנות `pending` ישנות מדי פעם (יש פקודה בסוף `schema.sql`).
 
 ---
 
 ## שינויים נפוצים
 
-**טקסטים** — `src/content/chapters.ts`. כל פרק = מסך אחד בדף הנחיתה.
-
-**מחיר** — `src/config.ts` ← `book.price`. אם משנים מחיר, צריך לעדכן אותו גם בכפתורים ב-PayPal.
-
-**תמונת כריכה** — שים את התמונה ב-`public/cover.jpg` וכתוב ב-`config.ts`:
-`coverImage: 'cover.jpg'`. בינתיים מוצגת כריכה מעוצבת.
-
-**תמונת שיתוף בוואטסאפ/פייסבוק** — `public/og.jpg` (‏1200×630).
-
-**דומיין משלך** — ‏Settings ← Pages ← Custom domain. האתר מתאים את עצמו לבד.
-
----
-
-## איך האנימציה עובדת (למי שרוצה לשנות)
-
-`src/pages/Landing.tsx`: כל המסכים יושבים זה על זה, ו-GSAP ScrollTrigger ״מצמיד״ אותם למסך.
-בגלילה, המסך הבא נפתח מתוך החלון המואר של המסך הנוכחי (`clip-path`), וכל תנועת גלילה מעבירה מסך אחד בדיוק.
-משתמשים שביקשו במערכת ההפעלה ״להפחית תנועה״ מקבלים דף גלילה רגיל, בלי אנימציה.
+- **טקסטים** — `src/content/chapters.ts`.
+- **מחיר** — בשני מקומות: `src/config.ts` ← `book.price` (מה שמוצג), וב-Supabase Secret בשם `BOOK_PRICE` (מה שנגבה בפועל, ברירת מחדל 84).
+- **כמות מקסימלית בהזמנה** — `site.maxQuantity` ב-`config.ts` ו-`MAX_QUANTITY` בפונקציה (5).
+- **איסוף עצמי** — `delivery.pickup.enabled`.
+- **כריכה** — `public/cover.jpg`. **איורים בפרקים** — `public/scenes/`.
+- **דומיין משלך** — Settings ← Pages ← Custom domain, ולעדכן את `ALLOWED_ORIGINS` ב-Supabase.
 
 ---
 
@@ -179,8 +174,8 @@ paypal.HostedButtons({ hostedButtonId: "XYZ789..." }).render("#paypal-container-
 
 | מה רואים | מה לעשות |
 |---|---|
-| דף לבן / 404 אחרי ההעלאה | ‏Settings ← Pages ← Source צריך להיות **GitHub Actions**. אחר כך Re-run לריצה האחרונה. |
-| הריצה ב-Actions נכשלה ב-Deploy | ודא שה-Source הוא GitHub Actions, ושהריפו ציבורי. |
-| עדיין מופיעה המסגרת המקווקוות של PayPal | ה-Secrets לא הוגדרו או שהשם שלהם לא מדויק (`PAYPAL_CLIENT_ID` וכו׳), או שלא הרצת מחדש את ה-workflow. |
-| ״אפשרויות התשלום לא נטענו״ | Client ID שגוי, או שהכפתור לא במטבע ILS. |
-| הכפתור של PayPal לא מופיע בלי שגיאה | בדוק שהכפתור נוצר כ-Stacked buttons ובמטבע ILS. |
+| דף לבן / 404 | Settings ← Pages ← Source = **GitHub Actions**, ואז Re-run. |
+| ״כאן יופיעו כפתורי התשלום״ | חסר `PAYPAL_CLIENT_ID` או `SUPABASE_URL` ב-GitHub Secrets, או שלא הרצת מחדש את ה-workflow. |
+| ״לא הצלחנו לפתוח את התשלום״ | בדוק ב-Supabase ← Edge Functions ← checkout ← **Logs**. בדרך כלל: Secret חסר, Client ID/Secret לא מאותה סביבה (sandbox/live), או `ALLOWED_ORIGINS` לא תואם לכתובת האתר. |
+| ״אין חיבור לשרת״ | הפונקציה לא פורסמה בשם `checkout`, או ש-Verify JWT עדיין דלוק. |
+| הזמנה ב-`payment_review` | הכסף עבר אבל משהו חריג (סכום שונה / PayPal עוד בודקים) — בדוק את העסקה ב-PayPal. |

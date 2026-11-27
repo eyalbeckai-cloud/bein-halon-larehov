@@ -12,6 +12,7 @@ export default function Footer() {
         <nav aria-label="קישורים בתחתית">
           <Link to="/checkout">רכישת הספר</Link>
           <Link to="/terms">תקנון ומדיניות ביטולים</Link>
+          <Link to="/privacy">מדיניות פרטיות</Link>
           {business.email && <a href={`mailto:${business.email}`}>{business.email}</a>}
           {business.phone && <a href={`tel:${business.phone.replace(/[^\d+]/g, '')}`}>{business.phone}</a>}
         </nav>

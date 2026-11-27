@@ -18,7 +18,7 @@ export const site = {
      * שימו קובץ בתיקייה public, למשל public/cover.jpg, וכתבו כאן 'cover.jpg'.
      * כל עוד זה ריק, האתר מציג כריכה מעוצבת.
      */
-    coverImage: '',
+    coverImage: 'cover.jpg',
   },
 
   delivery: {
@@ -29,23 +29,24 @@ export const site = {
     pickup: {
       /** false = רק משלוח. true = הלקוח יכול לבחור גם איסוף עצמי */
       enabled: true,
-      label: 'איסוף עצמי',
+      label: 'איסוף עצמי מרמת גן',
       note: 'ניצור קשר לתיאום מקום ושעה',
     },
     /** לדוגמה: 'עד 7 ימי עסקים'. ריק = לא מוצג */
     deliveryTime: '',
   },
 
+  /** כמה עותקים אפשר להזמין בהזמנה אחת (חייב להתאים ל-MAX_QUANTITY בפונקציית השרת) */
+  maxQuantity: 5,
+
   paypal: {
-    /** Client ID של PayPal. עדיף להגדיר ב-GitHub Variables בשם VITE_PAYPAL_CLIENT_ID */
+    /** Client ID של אפליקציית PayPal (ציבורי). מוגדר ב-GitHub Secrets בשם PAYPAL_CLIENT_ID */
     clientId: env.VITE_PAYPAL_CLIENT_ID || '',
-    /** מזהי הכפתורים שנוצרים בדשבורד של PayPal (hostedButtonId) */
-    buttons: {
-      shipping: env.VITE_PAYPAL_BUTTON_SHIPPING || '',
-      pickup: env.VITE_PAYPAL_BUTTON_PICKUP || '',
-    },
     currency: 'ILS',
   },
+
+  /** כתובת הפרויקט ב-Supabase, למשל https://abcd1234.supabase.co (GitHub Secrets: SUPABASE_URL) */
+  supabaseUrl: (env.VITE_SUPABASE_URL || '').replace(/\/$/, ''),
 
   /** פרטי העסק — מופיעים בתקנון ובתחתית האתר. חובה למלא לפני עלייה לאוויר */
   business: {

@@ -16,9 +16,9 @@ export default function Book({ className = '' }: Props) {
   return (
     <div className={`book ${className}`} role="img" aria-label={`הספר ${title} מאת ${author}`}>
       <div className="book__body">
-        <div className="book__front">
+        <div className={`book__front${coverSrc ? ' book__front--image' : ''}`}>
           {coverSrc ? (
-            <img src={coverSrc} alt="" />
+            <img src={coverSrc} alt="" decoding="async" />
           ) : (
             <div className="book__frame">
               <span className="book__title">{title}</span>
