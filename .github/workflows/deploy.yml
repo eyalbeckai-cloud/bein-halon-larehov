@@ -42,10 +42,10 @@ jobs:
           # הנתיב והכתובת של האתר — מתמלאים אוטומטית
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
           VITE_SITE_URL: ${{ steps.pages.outputs.base_url }}
-          # הגדרות PayPal — מ-Settings > Secrets and variables > Actions > Variables
-          VITE_PAYPAL_CLIENT_ID: ${{ vars.PAYPAL_CLIENT_ID }}
-          VITE_PAYPAL_BUTTON_SHIPPING: ${{ vars.PAYPAL_BUTTON_SHIPPING }}
-          VITE_PAYPAL_BUTTON_PICKUP: ${{ vars.PAYPAL_BUTTON_PICKUP }}
+          # הגדרות PayPal — מ-Settings > Secrets and variables > Actions > Secrets
+          VITE_PAYPAL_CLIENT_ID: ${{ secrets.PAYPAL_CLIENT_ID }}
+          VITE_PAYPAL_BUTTON_SHIPPING: ${{ secrets.PAYPAL_BUTTON_SHIPPING }}
+          VITE_PAYPAL_BUTTON_PICKUP: ${{ secrets.PAYPAL_BUTTON_PICKUP }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5

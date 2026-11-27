@@ -113,9 +113,9 @@ paypal.HostedButtons({ hostedButtonId: "XYZ789..." }).render("#paypal-container-
 
 **לא מדביקים את הקוד באתר** — האתר כבר יודע לטעון את הכפתור. צריך רק את המזהים.
 
-### 4.5 הכנסת המזהים לגיטהאב
-בריפו: **Settings ← Secrets and variables ← Actions ← לשונית Variables ← New repository variable**.
-צור שלושה משתנים:
+### 4.5 הכנסת המזהים לגיטהאב (כ-Secrets)
+בריפו: **Settings ← Secrets and variables ← Actions ← לשונית Secrets ← New repository secret**.
+צור שלושה Secrets (השם חייב להיות בדיוק כך, באותיות גדולות):
 
 | Name | Value |
 |---|---|
@@ -123,7 +123,8 @@ paypal.HostedButtons({ hostedButtonId: "XYZ789..." }).render("#paypal-container-
 | `PAYPAL_BUTTON_SHIPPING` | מזהה הכפתור של משלוח עד הבית |
 | `PAYPAL_BUTTON_PICKUP` | מזהה הכפתור של איסוף עצמי (או לא ליצור, אם אין איסוף) |
 
-> אלה ערכים ציבוריים (הם מופיעים בקוד של כל אתר עם כפתור PayPal), לכן **Variables** ולא Secrets.
+> ה-Secrets מוסתרים בהגדרות הריפו ובלוגים של Actions. שים לב: Client ID ומזהי הכפתורים עדיין יופיעו בקוד של האתר החי — כך PayPal עובד בכל אתר, וזה בטוח.
+> **לעולם אל תכניס את ה-Secret key של PayPal** (המפתח הסודי של האפליקציה) — האתר לא צריך אותו.
 
 ### 4.6 פרסום מחדש
 **Actions ← Deploy to GitHub Pages ← Run workflow**.
@@ -180,6 +181,6 @@ paypal.HostedButtons({ hostedButtonId: "XYZ789..." }).render("#paypal-container-
 |---|---|
 | דף לבן / 404 אחרי ההעלאה | ‏Settings ← Pages ← Source צריך להיות **GitHub Actions**. אחר כך Re-run לריצה האחרונה. |
 | הריצה ב-Actions נכשלה ב-Deploy | ודא שה-Source הוא GitHub Actions, ושהריפו ציבורי. |
-| עדיין מופיעה המסגרת המקווקוות של PayPal | המשתנים לא הוגדרו או שהשם שלהם לא מדויק (`PAYPAL_CLIENT_ID` וכו׳), או שלא הרצת מחדש את ה-workflow. |
+| עדיין מופיעה המסגרת המקווקוות של PayPal | ה-Secrets לא הוגדרו או שהשם שלהם לא מדויק (`PAYPAL_CLIENT_ID` וכו׳), או שלא הרצת מחדש את ה-workflow. |
 | ״אפשרויות התשלום לא נטענו״ | Client ID שגוי, או שהכפתור לא במטבע ILS. |
 | הכפתור של PayPal לא מופיע בלי שגיאה | בדוק שהכפתור נוצר כ-Stacked buttons ובמטבע ILS. |
