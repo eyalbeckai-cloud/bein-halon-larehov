@@ -25,7 +25,7 @@ export default function ThankYou() {
           בחרתם משלוח? הספר יישלח לכתובת שמילאתם
           {delivery.deliveryTime ? `, ${delivery.deliveryTime}` : ''}.
         </p>
-        {delivery.pickup.enabled && <p>בחרתם איסוף עצמי מרמת גן? ניצור איתכם קשר לתיאום מקום ושעה.</p>}
+        {delivery.pickup.enabled && <p>בחרתם איסוף עצמי? ניצור איתכם קשר לתיאום מקום ושעה.</p>}
         {business.email && (
           <p>
             שאלות על ההזמנה: <a href={`mailto:${business.email}`}>{business.email}</a>

@@ -11,7 +11,8 @@
  * Secrets שצריך להגדיר (Supabase > Edge Functions > Secrets):
  *   PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, PAYPAL_ENV (live | sandbox),
  *   ALLOWED_ORIGINS  (למשל https://eyalbeckai-cloud.github.io)
- *   BOOK_PRICE       (לא חובה, ברירת מחדל 84)
+ *   BOOK_PRICE       (לא חובה, ברירת מחדל 55 — מחיר עותק)
+ *   SHIPPING_PRICE   (לא חובה, ברירת מחדל 30 — משלוח להזמנה; איסוף עצמי חינם)
  * SUPABASE_URL והמפתח הסודי מוזרקים אוטומטית.
  */
 
@@ -21,7 +22,8 @@ const CURRENCY = 'ILS'
 
 const env = (name: string) => Deno.env.get(name)?.trim() ?? ''
 
-const BOOK_PRICE = Number(env('BOOK_PRICE') || '84')
+const BOOK_PRICE = Number(env('BOOK_PRICE') || '55')
+const SHIPPING_PRICE = Number(env('SHIPPING_PRICE') || '30')
 const PAYPAL_API = env('PAYPAL_ENV') === 'sandbox' ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com'
 const ALLOWED_ORIGINS = env('ALLOWED_ORIGINS')
   .split(',')
@@ -223,7 +225,10 @@ export function validateOrder(body: Record<string, unknown>): OrderInput {
 
 async function createOrder(body: Record<string, unknown>) {
   const input = validateOrder(body)
-  const total = Math.round(BOOK_PRICE * input.quantity * 100) / 100
+  const shipping = input.delivery_method === 'shipping'
+  const itemsTotal = Math.round(BOOK_PRICE * input.quantity * 100) / 100
+  const shippingFee = shipping ? SHIPPING_PRICE : 0
+  const total = Math.round((itemsTotal + shippingFee) * 100) / 100
 
   const [row] = await db<OrderRow[]>('orders', {
     method: 'POST',
@@ -232,13 +237,13 @@ async function createOrder(body: Record<string, unknown>) {
       ...input,
       status: 'pending',
       unit_price: BOOK_PRICE,
+      shipping_fee: shippingFee,
       total,
       currency: CURRENCY,
       terms_accepted_at: new Date().toISOString(),
     },
   })
 
-  const shipping = input.delivery_method === 'shipping'
   const unit: Record<string, unknown> = {
     reference_id: row.id,
     custom_id: row.id,
@@ -248,8 +253,8 @@ async function createOrder(body: Record<string, unknown>) {
       currency_code: CURRENCY,
       value: money(total),
       breakdown: {
-        item_total: { currency_code: CURRENCY, value: money(total) },
-        shipping: { currency_code: CURRENCY, value: '0.00' },
+        item_total: { currency_code: CURRENCY, value: money(itemsTotal) },
+        shipping: { currency_code: CURRENCY, value: money(shippingFee) },
       },
     },
     items: [

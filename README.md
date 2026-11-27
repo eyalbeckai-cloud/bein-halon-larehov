@@ -58,6 +58,8 @@
 2. הדבק את **כל** התוכן של `supabase/schema.sql` ← **Run**.
 3. ב-**Table Editor** תופיע טבלה בשם `orders`.
 
+> הרצת כבר גרסה קודמת של הקובץ? מריצים שוב את כולו — הוא לא מוחק נתונים, רק מוסיף את מה שחסר (למשל עמודת דמי המשלוח).
+
 > הטבלה נעולה: אף אחד מהאינטרנט לא יכול לקרוא או לכתוב אליה. רק פונקציית השרת (עם המפתח הסודי שנמצא אצל Supabase) כותבת אליה, ורק אתה רואה אותה בלוח הבקרה.
 
 ---
@@ -85,6 +87,7 @@
 | `PAYPAL_CLIENT_SECRET` | ה-Secret מ-PayPal |
 | `PAYPAL_ENV` | `sandbox` לבדיקות, `live` לאוויר |
 | `ALLOWED_ORIGINS` | `https://eyalbeckai-cloud.github.io` (הכתובת של האתר, בלי סלאש בסוף) |
+| `BOOK_PRICE`, `SHIPPING_PRICE` | לא חובה. רק אם משנים מחירים (ברירת מחדל: 55 לעותק, 30 משלוח להזמנה) |
 
 לא צריך להגדיר `SUPABASE_URL` או מפתחות — Supabase מזריקים אותם לבד.
 
@@ -162,7 +165,9 @@ update public.orders set status = 'shipped', shipped_at = now() where order_numb
 ## שינויים נפוצים
 
 - **טקסטים** — `src/content/chapters.ts`.
-- **מחיר** — בשני מקומות: `src/config.ts` ← `book.price` (מה שמוצג), וב-Supabase Secret בשם `BOOK_PRICE` (מה שנגבה בפועל, ברירת מחדל 84).
+- **מחירים** — בשני מקומות, וחייבים להתאים:
+  - מה שמוצג באתר: `src/config.ts` ← `book.price` (55) ו-`delivery.shipping.price` (30).
+  - מה שנגבה בפועל: Supabase Secrets ← `BOOK_PRICE` ו-`SHIPPING_PRICE` (בלי Secret: 55 ו-30). איסוף עצמי תמיד חינם.
 - **כמות מקסימלית בהזמנה** — `site.maxQuantity` ב-`config.ts` ו-`MAX_QUANTITY` בפונקציה (5).
 - **איסוף עצמי** — `delivery.pickup.enabled`.
 - **כריכה** — `public/cover.jpg`. **איורים בפרקים** — `public/scenes/`.

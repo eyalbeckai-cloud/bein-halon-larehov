@@ -139,6 +139,10 @@
 
 .delivery__price {
   font-weight: 600;
+  white-space: nowrap;
+}
+
+.delivery__price.is-free {
   color: #15803d;
 }
 

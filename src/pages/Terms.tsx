@@ -24,8 +24,10 @@ export default function Terms() {
 
         <h2>המוצר והמחיר</h2>
         <p>
-          הספר ״{book.title}״ מאת {book.author}, עותק מודפס. המחיר הסופי לתשלום הוא {formatPrice(book.price)},
-          כולל משלוח עד הבית בישראל.
+          הספר ״{book.title}״ מאת {book.author}, עותק מודפס: {formatPrice(book.price)} לעותק. משלוח עד הבית בישראל:{' '}
+          {formatPrice(delivery.shipping.price)} להזמנה.{' '}
+          {delivery.pickup.enabled && 'איסוף עצמי: ללא עלות. '}
+          המחיר הסופי לתשלום מוצג בעמוד הרכישה לפני התשלום.
         </p>
 
         <h2>הזמנה ותשלום</h2>
@@ -45,7 +47,7 @@ export default function Terms() {
           <Fill value={delivery.deliveryTime} label="זמן אספקה" />.
         </p>
         {delivery.pickup.enabled && (
-          <p>בבחירה באיסוף עצמי (מרמת גן) ניצור קשר לתיאום מקום ושעה לאיסוף.</p>
+          <p>בבחירה באיסוף עצמי ניצור קשר לתיאום מקום ושעה לאיסוף.</p>
         )}
 
         <h2>ביטול עסקה והחזרות</h2>

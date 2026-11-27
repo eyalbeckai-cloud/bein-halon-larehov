@@ -31,8 +31,10 @@ export default function Checkout() {
 
   const clientErrors = validate(form)
   const errors: FieldErrors = showErrors ? { ...clientErrors, ...serverErrors } : serverErrors
-  const total = book.price * form.quantity
   const shipping = form.delivery_method === 'shipping'
+  const booksTotal = book.price * form.quantity
+  const deliveryFee = shipping ? delivery.shipping.price : delivery.pickup.price
+  const total = booksTotal + deliveryFee
   const configured = Boolean(site.paypal.clientId && site.supabaseUrl)
 
   const set = <K extends keyof OrderForm>(key: K, value: OrderForm[K]) => {
@@ -86,12 +88,14 @@ export default function Checkout() {
                     <span className="delivery__label">{delivery[m].label}</span>
                     <span className="delivery__note">{delivery[m].note}</span>
                   </span>
-                  <span className="delivery__price">חינם</span>
+                  <span className={`delivery__price${delivery[m].price ? '' : ' is-free'}`}>{priceOrFree(delivery[m].price)}</span>
                 </label>
               ))}
             </fieldset>
           ) : (
-            <p className="delivery__single">{delivery.shipping.label}, חינם.</p>
+            <p className="delivery__single">
+              {delivery.shipping.label}: {priceOrFree(delivery.shipping.price)}
+            </p>
           )}
 
           {/* כמות */}
@@ -173,11 +177,11 @@ export default function Checkout() {
               <dt>
                 {book.title}, עותק מודפס × {form.quantity}
               </dt>
-              <dd>{formatPrice(total)}</dd>
+              <dd>{formatPrice(booksTotal)}</dd>
             </div>
             <div className="summary__row">
               <dt>{shipping ? delivery.shipping.label : delivery.pickup.label}</dt>
-              <dd>חינם</dd>
+              <dd>{priceOrFree(deliveryFee)}</dd>
             </div>
             <div className="summary__row summary__row--total">
               <dt>סה״כ לתשלום</dt>
@@ -299,6 +303,8 @@ export default function Checkout() {
     </div>
   )
 }
+
+const priceOrFree = (n: number) => (n ? formatPrice(n) : 'חינם')
 
 /* ---------------------------- שדה טופס ---------------------------- */
 

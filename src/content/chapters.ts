@@ -81,6 +81,6 @@ export const chapters: Chapter[] = [
 
 export const finale = {
   tone: 'red' as Tone,
-  title: 'עותק מודפס, עד הבית',
-  body: 'המשלוח עלינו. התשלום מאובטח דרך PayPal, אפשר גם בכרטיס אשראי.',
+  title: 'עותק מודפס של הספר',
+  body: 'התשלום מאובטח דרך PayPal, אפשר גם בכרטיס אשראי.',
 }

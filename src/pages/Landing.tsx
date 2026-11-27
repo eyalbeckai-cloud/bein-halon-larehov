@@ -3,7 +3,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
 import Book from '../components/Book'
-import BuyButton from '../components/BuyButton'
+import BuyButton, { deliveryNote } from '../components/BuyButton'
 import { site, formatPrice } from '../config'
 import { chapters, finale, hero, type Chapter, type Tone } from '../content/chapters'
 import '../styles/landing.css'
@@ -226,11 +226,14 @@ export default function Landing() {
             <p className="finale__price" data-reveal>
               {formatPrice(site.book.price)}
             </p>
+            <p className="finale__delivery" data-reveal>
+              {deliveryNote()}
+            </p>
             <p className="chapter__body" data-reveal>
               {finale.body}
             </p>
             <div data-reveal>
-              <BuyButton tone="light" />
+              <BuyButton tone="light" showNote={false} />
             </div>
           </div>
         </div>

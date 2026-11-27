@@ -18,6 +18,7 @@ create table if not exists public.orders (
   delivery_method  text not null check (delivery_method in ('shipping', 'pickup')),
   quantity         int  not null check (quantity between 1 and 10),
   unit_price       numeric(10,2) not null check (unit_price >= 0),
+  shipping_fee     numeric(10,2) not null default 0 check (shipping_fee >= 0),
   total            numeric(10,2) not null check (total >= 0),
   currency         text not null default 'ILS',
 
@@ -55,6 +56,17 @@ create table if not exists public.orders (
   )
 );
 
+-- ---------------------------------------------------------------------
+--  אבטחה (RLS): אף אחד מבחוץ לא יכול לקרוא או לכתוב לטבלה.
+--  רק פונקציית השרת (Edge Function) כותבת אליה, עם המפתח הסודי.
+--  אתה רואה את ההזמנות ב-Supabase > Table Editor.
+-- ---------------------------------------------------------------------
+alter table public.orders enable row level security;
+revoke all on public.orders from anon, authenticated;
+
+-- למי שכבר הריץ גרסה קודמת של הקובץ: מוסיף את עמודת דמי המשלוח
+alter table public.orders add column if not exists shipping_fee numeric(10,2) not null default 0;
+
 create index if not exists orders_status_idx on public.orders (status, created_at desc);
 
 -- updated_at מתעדכן לבד
@@ -73,14 +85,6 @@ drop trigger if exists orders_touch_updated_at on public.orders;
 create trigger orders_touch_updated_at
   before update on public.orders
   for each row execute function public.orders_touch_updated_at();
-
--- ---------------------------------------------------------------------
---  אבטחה: אף אחד מבחוץ לא יכול לקרוא או לכתוב לטבלה.
---  רק פונקציית השרת (Edge Function) כותבת אליה, עם המפתח הסודי.
---  אתה רואה את ההזמנות ב-Supabase > Table Editor.
--- ---------------------------------------------------------------------
-alter table public.orders enable row level security;
-revoke all on public.orders from anon, authenticated;
 
 -- ---------------------------------------------------------------------
 --  תצוגות נוחות (פתוחות רק לך, דרך לוח הבקרה של Supabase)
