@@ -13,8 +13,18 @@
  *   ALLOWED_ORIGINS  (למשל https://eyalbeckai-cloud.github.io)
  *   BOOK_PRICE       (לא חובה, ברירת מחדל 55 — מחיר עותק)
  *   SHIPPING_PRICE   (לא חובה, ברירת מחדל 30 — משלוח להזמנה; איסוף עצמי חינם)
+ *
+ * מיילים אחרי תשלום (לא חובה — בלי אלה פשוט לא נשלחים מיילים):
+ *   SMTP_USER        כתובת ה-Gmail שממנה נשלחים המיילים
+ *   SMTP_PASS        סיסמת אפליקציה (App Password) של אותו Gmail
+ *   NOTIFY_EMAILS    כתובות שמקבלות התראה על כל הזמנה, מופרדות בפסיק
+ *   MAIL_FROM_NAME   (לא חובה) שם השולח, ברירת מחדל: בין חלון לרחוב
+ *   SMTP_HOST / SMTP_PORT  (לא חובה) ברירת מחדל smtp.gmail.com / 465
+ *
  * SUPABASE_URL והמפתח הסודי מוזרקים אוטומטית.
  */
+
+import nodemailer from 'npm:nodemailer@6.9.16'
 
 const BOOK_TITLE = 'בין חלון לרחוב'
 const MAX_QUANTITY = 5
@@ -103,7 +113,18 @@ type OrderRow = {
   status: string
   delivery_method: 'shipping' | 'pickup'
   quantity: number
+  unit_price: number | string
+  shipping_fee: number | string | null
   total: number | string
+  full_name: string
+  phone: string
+  email: string
+  city: string | null
+  street: string | null
+  house_number: string | null
+  apartment: string | null
+  zip: string | null
+  delivery_notes: string | null
   paypal_order_id: string | null
 }
 
@@ -321,7 +342,7 @@ async function captureOrder(body: Record<string, unknown>) {
   if (!/^[A-Z0-9-]{5,40}$/.test(orderID)) throw new HttpError(400, 'invalid_order_id')
 
   const rows = await db<OrderRow[]>(
-    `orders?paypal_order_id=eq.${encodeURIComponent(orderID)}&select=id,order_number,status,delivery_method,quantity,total,paypal_order_id`,
+    `orders?paypal_order_id=eq.${encodeURIComponent(orderID)}&select=*`,
   )
   const order = rows[0]
   if (!order) throw new HttpError(404, 'order_not_found')
@@ -359,6 +380,7 @@ async function captureOrder(body: Record<string, unknown>) {
 
   if (capture?.status === 'COMPLETED' && amountOk) {
     await updateOrder(order.id, { ...common, status: 'paid', paid_at: new Date().toISOString() })
+    await queueEmails(order, 'paid')
     return { ok: true, orderNumber: order.order_number, status: 'paid' }
   }
 
@@ -369,11 +391,219 @@ async function captureOrder(body: Record<string, unknown>) {
       status: 'payment_review',
       admin_notes: amountOk ? `PayPal capture ${capture.status}` : `Amount mismatch: ${JSON.stringify(capture?.amount)}`,
     })
+    await queueEmails(order, 'review')
     return { ok: true, orderNumber: order.order_number, status: 'payment_review' }
   }
 
   await updateOrder(order.id, { ...common, status: 'failed', admin_notes: `PayPal status ${data?.status}` })
   throw new HttpError(502, 'payment_not_completed')
+}
+
+/* ---------------------------- Emails ---------------------------- */
+/*  אחרי תשלום: מייל תודה ללקוח + התראה לבעלי האתר.
+    נשלח ברקע — אם השליחה נכשלת, ההזמנה עדיין נשמרת והלקוח רואה את עמוד התודה.
+    התוצאה נרשמת בטבלה: customer_email_sent_at / notify_email_sent_at / email_error. */
+
+function mailConfig() {
+  const user = env('SMTP_USER')
+  const pass = env('SMTP_PASS').replace(/\s+/g, '') // Gmail מציג את סיסמת האפליקציה עם רווחים
+  if (!user || !pass) return null
+  const port = Number(env('SMTP_PORT') || '465')
+  return {
+    host: env('SMTP_HOST') || 'smtp.gmail.com',
+    port,
+    secure: env('SMTP_SECURE') ? env('SMTP_SECURE') === '1' : port === 465,
+    user,
+    pass,
+    fromName: env('MAIL_FROM_NAME') || BOOK_TITLE,
+    replyTo: env('REPLY_TO') || user,
+    notify: env('NOTIFY_EMAILS')
+      .split(/[,;\s]+/)
+      .map((s) => s.trim())
+      .filter((s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)),
+  }
+}
+
+const esc = (v: unknown) =>
+  String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!)
+
+const ils = (n: number | string | null) => {
+  const v = Number(n ?? 0)
+  return `${Number.isInteger(v) ? v : v.toFixed(2)} ₪`
+}
+
+function orderFacts(o: OrderRow) {
+  const shipping = o.delivery_method === 'shipping'
+  const fee = Number(o.shipping_fee ?? 0)
+  const address = shipping
+    ? [`${o.street ?? ''} ${o.house_number ?? ''}`.trim(), o.apartment ? `דירה ${o.apartment}` : '', o.city, o.zip]
+        .filter(Boolean)
+        .join(', ')
+    : ''
+  return {
+    shipping,
+    books: `${BOOK_TITLE}, עותק מודפס × ${o.quantity}`,
+    booksAmount: ils(Number(o.unit_price) * o.quantity),
+    delivery: shipping ? 'משלוח עד הבית' : 'איסוף עצמי',
+    deliveryAmount: fee ? ils(fee) : 'חינם',
+    total: ils(o.total),
+    address,
+  }
+}
+
+const row = (label: string, value: string, bold = false) =>
+  `<tr><td style="padding:10px 0;border-bottom:1px solid #e2e8f0;text-align:right;${bold ? 'font-weight:bold;font-size:18px;' : ''}">${label}</td>` +
+  `<td style="padding:10px 0;border-bottom:1px solid #e2e8f0;text-align:left;white-space:nowrap;${bold ? 'font-weight:bold;font-size:18px;' : ''}">${value}</td></tr>`
+
+function layout(title: string, inner: string) {
+  return `<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
+<body style="margin:0;background:#eef4f9;font-family:Arial,Helvetica,sans-serif;color:#0f172a">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef4f9;padding:24px 12px"><tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="rtl" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden">
+<tr><td style="background:#b5402a;color:#ffffff;padding:22px 28px;text-align:right">
+<div style="font-size:14px;opacity:0.85">${esc(BOOK_TITLE)} / ד״ר שמואל בק</div>
+<div style="font-size:26px;font-weight:bold;margin-top:6px">${esc(title)}</div></td></tr>
+<tr><td style="padding:24px 28px;text-align:right;font-size:16px;line-height:1.6">${inner}</td></tr>
+</table></td></tr></table></body></html>`
+}
+
+function customerEmail(o: OrderRow) {
+  const f = orderFacts(o)
+  const subject = `תודה על ההזמנה! מספר הזמנה ${o.order_number} — ${BOOK_TITLE}`
+  const html = layout(
+    'תודה על ההזמנה!',
+    `<p style="margin:0 0 12px">שלום ${esc(o.full_name)},</p>
+<p style="margin:0 0 16px">קיבלנו את ההזמנה שלך לספר ״${esc(BOOK_TITLE)}״ מאת ד״ר שמואל בק, והתשלום עבר בהצלחה.</p>
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin:0 0 20px;text-align:center">
+<div style="font-size:13px;color:#475569">מספר הזמנה</div>
+<div style="font-size:32px;font-weight:bold;letter-spacing:1px">${o.order_number}</div></div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:16px">
+${row(esc(f.books), f.booksAmount)}${row(f.delivery, f.deliveryAmount)}${row('סה״כ שולם', f.total, true)}
+</table>
+<p style="margin:20px 0 0">${
+      f.shipping
+        ? `<strong>כתובת למשלוח:</strong> ${esc(f.address)}`
+        : '<strong>איסוף עצמי:</strong> ניצור איתך קשר לתיאום מקום ושעה.'
+    }</p>
+<p style="margin:20px 0 0">יש שאלה? אפשר פשוט להשיב למייל הזה.</p>
+<p style="margin:16px 0 0">תודה ומקווים שתיהנו מהקריאה!</p>`,
+  )
+  const text = [
+    `שלום ${o.full_name},`,
+    `קיבלנו את ההזמנה שלך לספר "${BOOK_TITLE}" מאת ד״ר שמואל בק, והתשלום עבר בהצלחה.`,
+    '',
+    `מספר הזמנה: ${o.order_number}`,
+    `${f.books}: ${f.booksAmount}`,
+    `${f.delivery}: ${f.deliveryAmount}`,
+    `סה״כ שולם: ${f.total}`,
+    f.shipping ? `כתובת למשלוח: ${f.address}` : 'איסוף עצמי: ניצור איתך קשר לתיאום מקום ושעה.',
+    '',
+    'יש שאלה? אפשר פשוט להשיב למייל הזה.',
+  ].join('\n')
+  return { subject, html, text }
+}
+
+function ownerEmail(o: OrderRow, kind: 'paid' | 'review') {
+  const f = orderFacts(o)
+  const flag = kind === 'review' ? ' — לבדיקה ב-PayPal' : ''
+  const subject = `הזמנה חדשה ${o.order_number}: ${o.quantity} ${o.quantity === 1 ? 'עותק' : 'עותקים'}, ${f.delivery}, ${f.total}${flag}`
+  const details: [string, string][] = [
+    ['מספר הזמנה', String(o.order_number)],
+    ['שם', esc(o.full_name)],
+    ['טלפון', `<a href="tel:${esc(o.phone.replace(/[^\d+]/g, ''))}">${esc(o.phone)}</a>`],
+    ['אימייל', `<a href="mailto:${esc(o.email)}">${esc(o.email)}</a>`],
+    ['כמות', String(o.quantity)],
+    ['אופן מסירה', f.delivery],
+    ...(f.shipping ? ([['כתובת', esc(f.address)]] as [string, string][]) : []),
+    ...(o.delivery_notes ? ([['הערות', esc(o.delivery_notes)]] as [string, string][]) : []),
+    ['ספרים', f.booksAmount],
+    ['משלוח', f.deliveryAmount],
+    ['סה״כ שולם', f.total],
+  ]
+  const html = layout(
+    `הזמנה חדשה ${o.order_number}`,
+    `${
+      kind === 'review'
+        ? '<p style="margin:0 0 16px;padding:12px;background:#fef3c7;border-radius:8px"><strong>שימו לב:</strong> התשלום התקבל אבל מסומן לבדיקה (סכום חריג או תשלום בהמתנה אצל PayPal). כדאי לבדוק את העסקה ב-PayPal לפני שליחה.</p>'
+        : ''
+    }<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:16px">
+${details.map(([k, v], i) => row(k, v, i === details.length - 1)).join('')}
+</table>
+<p style="margin:20px 0 0;font-size:14px;color:#475569">כל ההזמנות: Supabase ← Table Editor ← orders. אפשר להשיב למייל הזה כדי לכתוב ישירות ללקוח.</p>`,
+  )
+  const text = [
+    `הזמנה חדשה ${o.order_number}${flag}`,
+    `שם: ${o.full_name}`,
+    `טלפון: ${o.phone}`,
+    `אימייל: ${o.email}`,
+    `כמות: ${o.quantity}`,
+    `אופן מסירה: ${f.delivery}`,
+    f.shipping ? `כתובת: ${f.address}` : '',
+    o.delivery_notes ? `הערות: ${o.delivery_notes}` : '',
+    `סה״כ שולם: ${f.total}`,
+  ]
+    .filter(Boolean)
+    .join('\n')
+  return { subject, html, text }
+}
+
+async function sendOrderEmails(o: OrderRow, kind: 'paid' | 'review') {
+  const cfg = mailConfig()
+  if (!cfg) {
+    console.warn('SMTP_USER / SMTP_PASS not set — order emails skipped')
+    return
+  }
+  const transporter = nodemailer.createTransport({
+    host: cfg.host,
+    port: cfg.port,
+    secure: cfg.secure,
+    auth: { user: cfg.user, pass: cfg.pass },
+    ...(env('SMTP_INSECURE') === '1' ? { tls: { rejectUnauthorized: false } } : {}),
+  })
+  const from = { name: cfg.fromName, address: cfg.user }
+  const now = () => new Date().toISOString()
+  const patch: Record<string, unknown> = {}
+  const errors: string[] = []
+
+  if (kind === 'paid') {
+    try {
+      await transporter.sendMail({ from, to: o.email, replyTo: cfg.replyTo, ...customerEmail(o) })
+      patch.customer_email_sent_at = now()
+    } catch (e) {
+      errors.push(`customer: ${(e as Error).message}`)
+    }
+  }
+
+  if (cfg.notify.length) {
+    try {
+      await transporter.sendMail({ from, to: cfg.notify, replyTo: o.email, ...ownerEmail(o, kind) })
+      patch.notify_email_sent_at = now()
+    } catch (e) {
+      errors.push(`notify: ${(e as Error).message}`)
+    }
+  }
+
+  transporter.close()
+  if (errors.length) {
+    console.error('Order email errors', errors)
+    patch.email_error = errors.join(' | ').slice(0, 500)
+  }
+  try {
+    if (Object.keys(patch).length) await updateOrder(o.id, patch)
+  } catch (e) {
+    console.error('Could not record email status (run schema.sql again?)', e)
+  }
+}
+
+/** שולח ברקע אם אפשר (EdgeRuntime.waitUntil), כדי שהלקוח לא יחכה למיילים */
+function queueEmails(o: OrderRow, kind: 'paid' | 'review'): Promise<void> | undefined {
+  const task = sendOrderEmails(o, kind).catch((e) => console.error('Order emails failed', e))
+  const runtime = (globalThis as { EdgeRuntime?: { waitUntil: (p: Promise<unknown>) => void } }).EdgeRuntime
+  if (runtime?.waitUntil) {
+    runtime.waitUntil(task)
+    return undefined
+  }
+  return task
 }
 
 /* ---------------------------- Server ---------------------------- */

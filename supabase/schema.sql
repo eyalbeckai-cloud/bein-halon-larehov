@@ -46,6 +46,11 @@ create table if not exists public.orders (
   paypal_shipping    jsonb,
   paid_at            timestamptz,
 
+  -- מיילים אחרי תשלום
+  customer_email_sent_at timestamptz,
+  notify_email_sent_at   timestamptz,
+  email_error            text,
+
   -- לשימוש שלך
   shipped_at       timestamptz,
   admin_notes      text,
@@ -64,8 +69,11 @@ create table if not exists public.orders (
 alter table public.orders enable row level security;
 revoke all on public.orders from anon, authenticated;
 
--- למי שכבר הריץ גרסה קודמת של הקובץ: מוסיף את עמודת דמי המשלוח
+-- למי שכבר הריץ גרסה קודמת של הקובץ: מוסיף עמודות חדשות (דמי משלוח, סטטוס מיילים)
 alter table public.orders add column if not exists shipping_fee numeric(10,2) not null default 0;
+alter table public.orders add column if not exists customer_email_sent_at timestamptz;
+alter table public.orders add column if not exists notify_email_sent_at timestamptz;
+alter table public.orders add column if not exists email_error text;
 
 create index if not exists orders_status_idx on public.orders (status, created_at desc);
 
