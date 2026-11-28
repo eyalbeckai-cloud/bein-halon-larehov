@@ -37,6 +37,10 @@ export default function ThankYou() {
           </div>
         )}
 
+        <p className="visually-hidden" role="status">
+          {copied ? 'מספר ההזמנה הועתק' : ''}
+        </p>
+
         <p>
           {review
             ? 'התשלום התקבל וממתין לאישור סופי של PayPal. ניצור קשר אם יהיה צורך במשהו נוסף.'

@@ -107,7 +107,9 @@ function BookMesh({ exitRef, onReady }: Omit<Props, 'active'>) {
     const t = state.clock.elapsedTime
     const exit = exitRef.current
     const sway = pointer.current.touch || (pointer.current.x === 0 && pointer.current.y === 0)
-    const px = sway ? Math.sin(t * 0.6) * 0.35 : pointer.current.x
+    // תנועה אוטומטית נמשכת פחות מ-5 שניות
+    const idle = Math.max(0, 1 - t / 4.5)
+    const px = sway ? Math.sin(t * 0.6) * 0.35 * idle : pointer.current.x
     const py = sway ? 0 : pointer.current.y
 
     const targetY = -0.42 + px * 0.3 + exit * 1.6
@@ -115,7 +117,7 @@ function BookMesh({ exitRef, onReady }: Omit<Props, 'active'>) {
     g.rotation.y = THREE.MathUtils.damp(g.rotation.y, targetY, 4, delta)
     g.rotation.x = THREE.MathUtils.damp(g.rotation.x, targetX, 4, delta)
     g.rotation.z = THREE.MathUtils.damp(g.rotation.z, -0.04 + exit * 0.1, 4, delta)
-    g.position.y = Math.sin(t * 1.1) * 0.05 - exit * 0.6
+    g.position.y = Math.sin(t * 1.1) * 0.05 * idle - exit * 0.6
   })
 
   return (

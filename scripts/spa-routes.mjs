@@ -5,7 +5,7 @@ import { copyFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 
 const dist = 'dist'
-const routes = ['checkout', 'thank-you', 'terms', 'privacy', 'admin']
+const routes = ['checkout', 'thank-you', 'terms', 'privacy', 'accessibility', 'admin']
 const index = join(dist, 'index.html')
 
 for (const route of routes) {

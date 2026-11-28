@@ -86,7 +86,15 @@ a {
   border-radius: 6px;
 }
 
-main:focus {
+/* על רקע כהה — מסגרת פוקוס לבנה */
+.panel--night :focus-visible,
+.panel--red :focus-visible,
+.site-footer :focus-visible {
+  outline-color: var(--white);
+}
+
+main:focus,
+main:focus-visible {
   outline: none;
 }
 
@@ -192,7 +200,6 @@ main:focus {
 
 .price__was {
   font-weight: 400;
-  opacity: 0.7;
   text-decoration-thickness: 0.1em;
 }
 

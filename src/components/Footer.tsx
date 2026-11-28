@@ -13,6 +13,7 @@ export default function Footer() {
           <Link to="/checkout">רכישת הספר</Link>
           <Link to="/terms">תקנון ומדיניות ביטולים</Link>
           <Link to="/privacy">מדיניות פרטיות</Link>
+          <Link to="/accessibility">הצהרת נגישות</Link>
           {business.email && <a href={`mailto:${business.email}`}>{business.email}</a>}
           {business.phone && <a href={`tel:${business.phone.replace(/[^\d+]/g, '')}`}>{business.phone}</a>}
         </nav>

@@ -210,8 +210,14 @@ export default function Checkout() {
                 onChange={(e) => set('terms_accepted', e.target.checked)}
               />
               <span>
-                קראתי ואני מאשר/ת את <Link to="/terms" target="_blank">התקנון ומדיניות הביטולים</Link> ואת{' '}
-                <Link to="/privacy" target="_blank">מדיניות הפרטיות</Link>.
+                קראתי ואני מאשר/ת את <Link to="/terms" target="_blank">
+                  התקנון ומדיניות הביטולים<span className="visually-hidden"> (נפתח בלשונית חדשה)</span>
+                </Link>{' '}
+                ואת{' '}
+                <Link to="/privacy" target="_blank">
+                  מדיניות הפרטיות<span className="visually-hidden"> (נפתח בלשונית חדשה)</span>
+                </Link>
+                .
               </span>
             </label>
             {errors.terms_accepted && (
