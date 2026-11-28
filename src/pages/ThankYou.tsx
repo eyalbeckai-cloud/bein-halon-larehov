@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { site } from '../config'
 
@@ -6,21 +7,42 @@ export default function ThankYou() {
   const [params] = useSearchParams()
   const orderNumber = params.get('order')
   const review = params.get('review') === '1'
+  const [copied, setCopied] = useState(false)
+
+  const copy = async () => {
+    if (!orderNumber) return
+    try {
+      await navigator.clipboard.writeText(orderNumber)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      /* הדפדפן לא איפשר העתקה — המספר עדיין מוצג על המסך */
+    }
+  }
 
   return (
     <div className="page page--soft">
       <div className="prose">
         <h1>תודה, ההזמנה התקבלה</h1>
+
         {orderNumber && (
-          <p>
-            מספר ההזמנה שלך: <strong>{orderNumber}</strong>
-          </p>
+          <div className="order-number">
+            <div>
+              <p className="order-number__label">מספר הזמנה</p>
+              <p className="order-number__value">{orderNumber}</p>
+            </div>
+            <button type="button" className="btn btn--ink btn--small" onClick={copy}>
+              {copied ? 'הועתק' : 'העתקת המספר'}
+            </button>
+          </div>
         )}
-        {review ? (
-          <p>התשלום התקבל וממתין לאישור סופי של PayPal. ניצור קשר אם יהיה צורך במשהו נוסף.</p>
-        ) : (
-          <p>אישור התשלום נשלח אליכם במייל מ-PayPal.</p>
-        )}
+
+        <p>
+          {review
+            ? 'התשלום התקבל וממתין לאישור סופי של PayPal. ניצור קשר אם יהיה צורך במשהו נוסף.'
+            : 'אישור התשלום נשלח אליכם במייל מ-PayPal, ומספר ההזמנה מופיע בו.'}{' '}
+          כדאי לשמור את המספר — איתו אפשר לפנות אלינו לגבי ההזמנה.
+        </p>
         <p>
           בחרתם משלוח? הספר יישלח לכתובת שמילאתם
           {delivery.deliveryTime ? `, ${delivery.deliveryTime}` : ''}.

@@ -248,7 +248,7 @@ async function createOrder(body: Record<string, unknown>) {
     reference_id: row.id,
     custom_id: row.id,
     invoice_id: `BHL-${row.order_number}`,
-    description: `${BOOK_TITLE} — ${shipping ? 'משלוח עד הבית' : 'איסוף עצמי מרמת גן'}`,
+    description: `הזמנה ${row.order_number} — ${BOOK_TITLE} — ${shipping ? 'משלוח עד הבית' : 'איסוף עצמי מרמת גן'}`,
     amount: {
       currency_code: CURRENCY,
       value: money(total),
@@ -259,7 +259,8 @@ async function createOrder(body: Record<string, unknown>) {
     },
     items: [
       {
-        name: `${BOOK_TITLE} — עותק מודפס`,
+        // מספר ההזמנה בשם הפריט: PayPal מציגים אותו ללקוח בעמוד התשלום ובמייל האישור
+        name: `${BOOK_TITLE} — עותק מודפס (הזמנה ${row.order_number})`,
         quantity: String(input.quantity),
         unit_amount: { currency_code: CURRENCY, value: money(BOOK_PRICE) },
         category: 'PHYSICAL_GOODS',

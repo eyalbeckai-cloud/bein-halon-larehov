@@ -302,6 +302,40 @@ main:focus {
   padding-inline-start: 1.25rem;
 }
 
+/* מספר הזמנה בעמוד התודה */
+.order-number {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 1.75rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--white);
+  box-shadow: 0 20px 40px -30px rgba(15, 23, 42, 0.35);
+}
+
+.prose .order-number p {
+  margin: 0;
+}
+
+.order-number__label {
+  font-size: var(--step--1);
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.prose .order-number__value {
+  font-size: var(--step-3);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
 .fill-me {
   background: #fde68a;
   padding: 0 0.3em;
