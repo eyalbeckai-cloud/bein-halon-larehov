@@ -36,8 +36,8 @@ export const site = {
       price: 0,
     },
     /** לדוגמה: 'עד 7 ימי עסקים'. ריק = לא מוצג */
-    deliveryTime: '',
-  },
+    deliveryTime: 'עד 14 ימי עסקים',
+    },
 
   /** כמה עותקים אפשר להזמין בהזמנה אחת (חייב להתאים ל-MAX_QUANTITY בפונקציית השרת) */
   maxQuantity: 5,
@@ -53,11 +53,11 @@ export const site = {
 
   /** פרטי העסק — מופיעים בתקנון ובתחתית האתר. חובה למלא לפני עלייה לאוויר */
   business: {
-    name: '',
-    registrationNumber: '',
-    email: '',
-    phone: '',
-    address: '',
+    name: 'ד״ר שמואל בק',
+    registrationNumber: '012345678',
+    email: 'shmuelbeck54@gmail.com',
+    phone: '050-6966817',
+    address: 'זבוטינסקי, 5, רמת גן',
   },
 }
 
