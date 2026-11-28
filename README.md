@@ -5,6 +5,7 @@
 - **האתר** — סטטי, מתארח בחינם ב-GitHub Pages ועולה אוטומטית ב-GitHub Actions.
 - **התשלום** — PayPal (חשבון PayPal או כרטיס אשראי).
 - **ההזמנות** — נשמרות ב-Supabase. פונקציית שרת קטנה (Edge Function) פותחת את התשלום, מוודאת מול PayPal שהוא עבר ובסכום הנכון, ורק אז מסמנת את ההזמנה כ״שולמה״.
+- **ניהול** — עמוד `/admin` באתר, עם סיסמה: כל ההזמנות, סימון ״נשלחה״ / ״הגיעה״ / ״נאספה״, תיקון פרטים, הערות והורדה לאקסל.
 
 ---
 
@@ -17,7 +18,9 @@
 | `src/pages/Checkout.tsx` | עמוד הרכישה: טופס פרטים + כפתורי PayPal |
 | `src/pages/Terms.tsx`, `src/pages/Privacy.tsx` | תקנון ומדיניות פרטיות |
 | `supabase/schema.sql` | **ה-SQL** שמקים את טבלת ההזמנות |
-| `supabase/functions/checkout/index.ts` | **פונקציית השרת** (נפתחת ב-Supabase) |
+| `supabase/functions/checkout/index.ts` | **פונקציית השרת** של הרכישה (נפתחת ב-Supabase) |
+| `src/pages/Admin.tsx` | עמוד הניהול (`/admin`) |
+| `supabase/functions/admin/index.ts` | **פונקציית השרת** של עמוד הניהול |
 | `public/` | כריכה, איורים, אייקון ותמונת שיתוף |
 | `.github/workflows/deploy.yml` | בנייה והעלאה אוטומטית ל-GitHub Pages |
 
@@ -162,20 +165,41 @@ npx supabase functions deploy checkout --no-verify-jwt
 
 ---
 
+## שלב 8 — עמוד הניהול (`/admin`)
+
+עמוד באתר שבו רואים ומנהלים את כל ההזמנות, בלי להיכנס לסופבייס. נכנסים אליו עם סיסמה אחת.
+
+1. **הסיסמה:** Supabase ← **Edge Functions ← Secrets** ← מוסיפים `ADMIN_PASSWORD` עם סיסמה של **10 תווים לפחות** (מומלץ ארוכה, למשל שלוש מילים ומספר). זו הסיסמה ששמואל יקליד.
+2. **הטבלה:** SQL Editor ← מריצים שוב את כל `supabase/schema.sql` (בטוח, לא מוחק כלום). זה מוסיף את המצב ״הגיעה ללקוח״ ואת ההגנה מניחוש סיסמה.
+3. **הפונקציה:** Edge Functions ← **Deploy a new function ← Via Editor** ← שם: `admin` (בדיוק כך) ← מדביקים את **כל** `supabase/functions/admin/index.ts` ← **Deploy** ← מכבים **Verify JWT**, כמו ב-`checkout`.
+   בטרמינל: `npx supabase functions deploy admin --no-verify-jwt`
+4. **מעדכנים גם את `checkout`:** מדביקים שוב את `supabase/functions/checkout/index.ts` ← **Deploy** (תיקון קטן שמתאים למצב ״הגיעה ללקוח״).
+5. דוחפים לגיט, וה-workflow מעלה את העמוד.
+
+**הכתובת:** כתובת האתר + `/admin`, למשל `https://eyalbeckai-cloud.github.io/bein-halon-larehov/admin` (או `https://<הדומיין>/admin`). העמוד לא מקושר מהאתר ולא מופיע בגוגל. כדאי לשמור אותו במועדפים.
+
+**מה יש בו:**
+- למעלה: כמה הזמנות מחכות למשלוח ולאיסוף, וכמה נמכר עד היום.
+- לשוניות: **לטיפול** (שולמו, מהישנה לחדשה) · **בדרך** · **הושלמו** · **בוטלו** · **לא שולמו** (אנשים שלא סיימו לשלם — לא חויבו).
+- בכל הזמנה: כפתור אחד לשלב הבא (״נשלחה״ ← ״הגיעה ללקוח״, או ״נאספה״ באיסוף עצמי). אחרי כל סימון מופיע כפתור **ביטול** לכמה שניות, למקרה של טעות.
+- התקשרות / וואטסאפ / מייל בלחיצה, העתקת שם וכתובת למדבקה.
+- **עוד פעולות:** תיקון פרטי לקוח, חזרה לשלב הקודם, ביטול הזמנה (את ההחזר עצמו עושים ב-PayPal).
+- **הערה פנימית** (למשל מספר מעקב של הדואר) — רק אתם רואים.
+- **הורדה לאקסל** של הרשימה שעל המסך.
+
+**אבטחה:** הסיסמה שמורה רק בסופבייס. אחרי 8 ניסיונות שגויים הכניסה ננעלת לרבע שעה. הכניסה נשמרת בדפדפן 14 יום (או עד ״יציאה״). **החלפת `ADMIN_PASSWORD` מנתקת מיד את כולם** — זה גם מה שעושים אם הסיסמה דלפה.
+
+---
+
 ## איפה רואים את ההזמנות
 
-ב-Supabase ← **Table Editor**:
+**בעמוד הניהול** (שלב 8). כגיבוי, הכול נמצא גם ב-Supabase ← **Table Editor**:
 - `orders` — כל ההזמנות (כולל `pending` שלא שולמו).
 - `orders_to_ship` — שולמו ומחכות למשלוח, עם הכתובת.
 - `orders_to_pickup` — שולמו ומחכות לאיסוף.
 - `sales_summary` — כמה הזמנות, כמה ספרים, כמה כסף.
 
-אחרי ששלחת ספר — ב-SQL Editor:
-```sql
-update public.orders set status = 'shipped', shipped_at = now() where order_number = 1001;
-```
-
-מצבים: `pending` (נפתח, לא שולם) · `paid` (שולם) · `payment_review` (שולם אבל חריג — לבדוק ב-PayPal) · `failed` · `shipped` · `cancelled` · `refunded`.
+מצבים: `pending` (נפתח, לא שולם) · `paid` (שולם, מחכה לטיפול) · `payment_review` (שולם אבל חריג — לבדוק ב-PayPal) · `failed` · `shipped` (נשלח) · `delivered` (הגיע / נאסף) · `cancelled` · `refunded` (בוטל והכסף הוחזר).
 
 ---
 
@@ -211,4 +235,8 @@ update public.orders set status = 'shipped', shipped_at = now() where order_numb
 | ״לא הצלחנו לפתוח את התשלום״ | בדוק ב-Supabase ← Edge Functions ← checkout ← **Logs**. בדרך כלל: Secret חסר, Client ID/Secret לא מאותה סביבה (sandbox/live), או `ALLOWED_ORIGINS` לא תואם לכתובת האתר. |
 | ״אין חיבור לשרת״ | הפונקציה לא פורסמה בשם `checkout`, או ש-Verify JWT עדיין דלוק. |
 | הלקוח לא קיבל מייל | בטבלה `orders` בדוק את `email_error`. ״Invalid login״ = סיסמת אפליקציה שגויה או שאין אימות דו-שלבי. אם הכול ריק — חסרים `SMTP_USER`/`SMTP_PASS`. בקש מהלקוח לבדוק גם בספאם. |
+| עמוד הניהול: ״עדיין לא הוגדרה סיסמה״ | חסר `ADMIN_PASSWORD` בסופבייס, או שהוא קצר מ-10 תווים. |
+| עמוד הניהול: ״צריך להריץ שוב את schema.sql״ | מריצים שוב את כל `supabase/schema.sql` ב-SQL Editor. |
+| עמוד הניהול: ״אין חיבור לשרת״ | הפונקציה `admin` לא פורסמה בשם הזה, או ש-Verify JWT דלוק בה. |
+| שכחתם את סיסמת הניהול | מחליפים את `ADMIN_PASSWORD` בסופבייס. אין צורך לפרסם מחדש. |
 | הזמנה ב-`payment_review` | הכסף עבר אבל משהו חריג (סכום שונה / PayPal עוד בודקים) — בדוק את העסקה ב-PayPal. |

@@ -12,7 +12,7 @@ create table if not exists public.orders (
 
   -- מצב ההזמנה
   status text not null default 'pending'
-    check (status in ('pending', 'paid', 'payment_review', 'failed', 'shipped', 'cancelled', 'refunded')),
+    check (status in ('pending', 'paid', 'payment_review', 'failed', 'shipped', 'delivered', 'cancelled', 'refunded')),
 
   -- מה הוזמן
   delivery_method  text not null check (delivery_method in ('shipping', 'pickup')),
@@ -51,8 +51,9 @@ create table if not exists public.orders (
   notify_email_sent_at   timestamptz,
   email_error            text,
 
-  -- לשימוש שלך
+  -- עמוד הניהול
   shipped_at       timestamptz,
+  delivered_at     timestamptz,
   admin_notes      text,
 
   constraint shipping_needs_address check (
@@ -64,18 +65,36 @@ create table if not exists public.orders (
 -- ---------------------------------------------------------------------
 --  אבטחה (RLS): אף אחד מבחוץ לא יכול לקרוא או לכתוב לטבלה.
 --  רק פונקציית השרת (Edge Function) כותבת אליה, עם המפתח הסודי.
---  אתה רואה את ההזמנות ב-Supabase > Table Editor.
+--  ההזמנות מוצגות בעמוד הניהול של האתר (/admin) ובלוח הבקרה של Supabase.
 -- ---------------------------------------------------------------------
 alter table public.orders enable row level security;
 revoke all on public.orders from anon, authenticated;
 
--- למי שכבר הריץ גרסה קודמת של הקובץ: מוסיף עמודות חדשות (דמי משלוח, סטטוס מיילים)
+-- למי שכבר הריץ גרסה קודמת של הקובץ: מוסיף עמודות חדשות (דמי משלוח, סטטוס מיילים, הגיע ללקוח)
 alter table public.orders add column if not exists shipping_fee numeric(10,2) not null default 0;
 alter table public.orders add column if not exists customer_email_sent_at timestamptz;
 alter table public.orders add column if not exists notify_email_sent_at timestamptz;
 alter table public.orders add column if not exists email_error text;
+alter table public.orders add column if not exists delivered_at timestamptz;
+
+-- הסטטוס "delivered" (הגיע ללקוח / נאסף) נוסף בגרסה מאוחרת יותר
+alter table public.orders drop constraint if exists orders_status_check;
+alter table public.orders add constraint orders_status_check
+  check (status in ('pending', 'paid', 'payment_review', 'failed', 'shipped', 'delivered', 'cancelled', 'refunded'));
 
 create index if not exists orders_status_idx on public.orders (status, created_at desc);
+
+-- ---------------------------------------------------------------------
+--  עמוד הניהול: רישום ניסיונות כניסה שגויים (הגנה מניחוש סיסמה)
+-- ---------------------------------------------------------------------
+create table if not exists public.admin_login_attempts (
+  id         bigint generated always as identity primary key,
+  ip         text not null,
+  created_at timestamptz not null default now()
+);
+alter table public.admin_login_attempts enable row level security;
+revoke all on public.admin_login_attempts from anon, authenticated;
+create index if not exists admin_login_attempts_created_idx on public.admin_login_attempts (created_at);
 
 -- updated_at מתעדכן לבד
 create or replace function public.orders_touch_updated_at()
@@ -120,9 +139,9 @@ order by paid_at;
 create or replace view public.sales_summary
 with (security_invoker = true) as
 select
-  count(*) filter (where status in ('paid', 'shipped'))                    as paid_orders,
-  coalesce(sum(quantity) filter (where status in ('paid', 'shipped')), 0) as books_sold,
-  coalesce(sum(total)    filter (where status in ('paid', 'shipped')), 0) as revenue_ils,
+  count(*) filter (where status in ('paid', 'shipped', 'delivered'))                    as paid_orders,
+  coalesce(sum(quantity) filter (where status in ('paid', 'shipped', 'delivered')), 0) as books_sold,
+  coalesce(sum(total)    filter (where status in ('paid', 'shipped', 'delivered')), 0) as revenue_ils,
   count(*) filter (where status = 'paid' and delivery_method = 'shipping') as waiting_to_ship,
   count(*) filter (where status = 'paid' and delivery_method = 'pickup')   as waiting_for_pickup
 from public.orders;
@@ -130,7 +149,7 @@ from public.orders;
 revoke all on public.orders_to_ship, public.orders_to_pickup, public.sales_summary from anon, authenticated;
 
 -- ---------------------------------------------------------------------
---  שימושי:
+--  שימושי (בדרך כלל עושים את זה מעמוד הניהול באתר, /admin):
 --    סימון הזמנה כנשלחה:
 --      update public.orders set status = 'shipped', shipped_at = now() where order_number = 1001;
 --    מחיקת הזמנות שלא שולמו ונשארו פתוחות יותר משבוע:

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { Route, Routes, useLocation } from 'react-router'
 import Header from './components/Header'
 import Footer from './components/Footer'
@@ -9,6 +9,9 @@ import Terms from './pages/Terms'
 import Privacy from './pages/Privacy'
 import NotFound from './pages/NotFound'
 
+// עמוד הניהול נטען רק כשנכנסים אליו
+const Admin = lazy(() => import('./pages/Admin'))
+
 function ScrollToTop() {
   const { pathname } = useLocation()
   useEffect(() => {
@@ -18,6 +21,17 @@ function ScrollToTop() {
 }
 
 export default function App() {
+  const { pathname } = useLocation()
+
+  // עמוד הניהול: בלי הכותרת והתחתית של האתר
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+    return (
+      <Suspense fallback={null}>
+        <Admin />
+      </Suspense>
+    )
+  }
+
   return (
     <>
       <ScrollToTop />

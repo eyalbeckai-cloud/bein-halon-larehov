@@ -346,9 +346,11 @@ async function captureOrder(body: Record<string, unknown>) {
   )
   const order = rows[0]
   if (!order) throw new HttpError(404, 'order_not_found')
-  if (order.status === 'paid' || order.status === 'shipped') {
+  // כבר טופלה (למשל לחיצה כפולה): מחזירים את המצב הקיים בלי לגבות שוב
+  if (['paid', 'shipped', 'delivered', 'payment_review'].includes(order.status)) {
     return { ok: true, orderNumber: order.order_number, status: order.status }
   }
+  if (order.status === 'cancelled' || order.status === 'refunded') throw new HttpError(409, 'order_closed')
 
   const token = await paypalToken()
   let res = await paypal(`/v2/checkout/orders/${orderID}/capture`, 'POST', token, {}, `capture-${order.id}`)
@@ -529,7 +531,7 @@ function ownerEmail(o: OrderRow, kind: 'paid' | 'review') {
     }<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:16px">
 ${details.map(([k, v], i) => row(k, v, i === details.length - 1)).join('')}
 </table>
-<p style="margin:20px 0 0;font-size:14px;color:#475569">כל ההזמנות: Supabase ← Table Editor ← orders. אפשר להשיב למייל הזה כדי לכתוב ישירות ללקוח.</p>`,
+<p style="margin:20px 0 0;font-size:14px;color:#475569">כל ההזמנות בעמוד הניהול של האתר (בכתובת האתר, ‎/admin). אפשר להשיב למייל הזה כדי לכתוב ישירות ללקוח.</p>`,
   )
   const text = [
     `הזמנה חדשה ${o.order_number}${flag}`,

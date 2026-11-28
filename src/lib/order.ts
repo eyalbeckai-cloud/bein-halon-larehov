@@ -108,7 +108,7 @@ export const createOrder = (form: OrderForm) =>
   call<{ orderID: string; orderNumber: number }>({ action: 'create', ...form })
 
 export const captureOrder = (orderID: string) =>
-  call<{ ok: true; orderNumber: number; status: 'paid' | 'payment_review' | 'shipped' }>({
+  call<{ ok: true; orderNumber: number; status: 'paid' | 'payment_review' | 'shipped' | 'delivered' }>({
     action: 'capture',
     orderID,
   })
