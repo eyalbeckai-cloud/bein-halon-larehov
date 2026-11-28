@@ -43,6 +43,32 @@
   line-height: 1.1;
 }
 
+.checkout__book-price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.85rem;
+  margin-top: 0.85rem;
+  font-size: var(--step-2);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.checkout__book-price .price__was {
+  font-size: 0.7em;
+}
+
+.checkout__sale {
+  padding: 0.25rem 0.8rem;
+  white-space: nowrap;
+  border-radius: 999px;
+  background: #fbe3dc;
+  color: var(--red-dark);
+  font-size: var(--step--1);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
 .checkout__book-author {
   margin-top: 0.25rem;
   font-size: var(--step-1);
@@ -482,7 +508,7 @@
   }
 
   .checkout__arch {
-    grid-row: span 2;
+    grid-row: span 3;
   }
 
   .checkout__book-title {
@@ -492,6 +518,13 @@
 
   .checkout__book-author {
     align-self: start;
+  }
+
+  .checkout__book-price {
+    grid-column: 2;
+    align-self: start;
+    margin-top: 0.4rem;
+    font-size: var(--step-1);
   }
 
   .fields__row,

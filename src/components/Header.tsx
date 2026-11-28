@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router'
-import { site, formatPrice } from '../config'
+import { site } from '../config'
+import Price from './Price'
 
 export default function Header() {
   const { pathname } = useLocation()
@@ -22,7 +23,7 @@ export default function Header() {
       </Link>
       {!isCheckout && (
         <Link to="/checkout" className="btn btn--primary btn--small">
-          לרכישה <span className="btn__price">{formatPrice(site.book.price)}</span>
+          לרכישה <Price className="btn__price" />
         </Link>
       )}
       <span className="site-header__progress" aria-hidden="true" />

@@ -4,7 +4,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
 import Book from '../components/Book'
 import BuyButton, { deliveryNote } from '../components/BuyButton'
-import { site, formatPrice } from '../config'
+import Price, { onSale, saleNote } from '../components/Price'
+import { site } from '../config'
 import { chapters, finale, hero, type Chapter, type Tone } from '../content/chapters'
 import '../styles/landing.css'
 
@@ -223,8 +224,13 @@ export default function Landing() {
             <h2 id="buy-title" className="chapter__title" data-reveal>
               {finale.title}
             </h2>
+            {onSale() && (
+              <p className="finale__sale" data-reveal>
+                {saleNote()}
+              </p>
+            )}
             <p className="finale__price" data-reveal>
-              {formatPrice(site.book.price)}
+              <Price />
             </p>
             <p className="finale__delivery" data-reveal>
               {deliveryNote()}

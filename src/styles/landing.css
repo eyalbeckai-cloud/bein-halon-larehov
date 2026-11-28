@@ -306,6 +306,27 @@
   line-height: 1;
 }
 
+.finale__price .price {
+  gap: 0.3em;
+}
+
+.finale__price .price__was {
+  font-size: 0.5em;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  opacity: 0.75;
+}
+
+/* "במבצע כרגע: 55 ₪ בלבד" */
+.finale__sale {
+  padding: 0.35rem 0.95rem;
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--red);
+  font-size: var(--step--1);
+  font-weight: 700;
+}
+
 .finale__delivery {
   margin-top: -0.25rem;
   font-size: var(--step-1);

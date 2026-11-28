@@ -24,7 +24,8 @@ export default function Terms() {
 
         <h2>המוצר והמחיר</h2>
         <p>
-          הספר ״{book.title}״ מאת {book.author}, עותק מודפס: {formatPrice(book.price)} לעותק. משלוח עד הבית בישראל:{' '}
+          הספר ״{book.title}״ מאת {book.author}, עותק מודפס: {formatPrice(book.price)} לעותק
+          {book.regularPrice > book.price && ` (מחיר מבצע, במקום ${formatPrice(book.regularPrice)})`}. משלוח עד הבית בישראל:{' '}
           {formatPrice(delivery.shipping.price)} להזמנה.{' '}
           {delivery.pickup.enabled && 'איסוף עצמי: ללא עלות. '}
           המחיר הסופי לתשלום מוצג בעמוד הרכישה לפני התשלום.

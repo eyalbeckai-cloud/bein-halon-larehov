@@ -218,6 +218,7 @@ npx supabase functions deploy checkout --no-verify-jwt
 - **טקסטים** — `src/content/chapters.ts`.
 - **מחירים** — בשני מקומות, וחייבים להתאים:
   - מה שמוצג באתר: `src/config.ts` ← `book.price` (55) ו-`delivery.shipping.price` (30).
+  - **מבצע:** `book.regularPrice` (65) מוצג עם קו חוצה ליד המחיר, עם ״במבצע כרגע״. כדי לסיים את המבצע: `regularPrice: 0`. זה רק תצוגה, מה שנגבה הוא `price`.
   - מה שנגבה בפועל: Supabase Secrets ← `BOOK_PRICE` ו-`SHIPPING_PRICE` (בלי Secret: 55 ו-30). איסוף עצמי תמיד חינם.
 - **כמות מקסימלית בהזמנה** — `site.maxQuantity` ב-`config.ts` ו-`MAX_QUANTITY` בפונקציה (5).
 - **איסוף עצמי** — `delivery.pickup.enabled`.

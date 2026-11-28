@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router'
 import Book from '../components/Book'
 import PayPalButtons from '../components/PayPalButtons'
 import { site, formatPrice } from '../config'
+import Price, { onSale } from '../components/Price'
 import {
   ApiError,
   captureOrder,
@@ -59,6 +60,10 @@ export default function Checkout() {
           </div>
           <p className="checkout__book-title">{book.title}</p>
           <p className="checkout__book-author">{book.author}</p>
+          <p className="checkout__book-price">
+            <Price />
+            {onSale() && <span className="checkout__sale">במבצע כרגע</span>}
+          </p>
         </aside>
 
         <form
@@ -177,7 +182,9 @@ export default function Checkout() {
               <dt>
                 {book.title}, עותק מודפס × {form.quantity}
               </dt>
-              <dd>{formatPrice(booksTotal)}</dd>
+              <dd>
+                <Price amount={booksTotal} regular={book.regularPrice * form.quantity} />
+              </dd>
             </div>
             <div className="summary__row">
               <dt>{shipping ? delivery.shipping.label : delivery.pickup.label}</dt>
