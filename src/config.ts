@@ -7,6 +7,15 @@
 
 const env = import.meta.env
 
+/** https://abcd.supabase.co/rest/v1 → https://abcd.supabase.co */
+function originOf(url?: string): string {
+  try {
+    return url ? new URL(url.trim()).origin : ''
+  } catch {
+    return ''
+  }
+}
+
 export const site = {
   book: {
     title: 'בין חלון לרחוב',
@@ -53,8 +62,11 @@ export const site = {
     currency: 'ILS',
   },
 
-  /** כתובת הפרויקט ב-Supabase, למשל https://abcd1234.supabase.co (GitHub Secrets: SUPABASE_URL) */
-  supabaseUrl: (env.VITE_SUPABASE_URL || '').replace(/\/$/, ''),
+  /**
+   * כתובת הפרויקט ב-Supabase, למשל https://abcd1234.supabase.co (GitHub Secrets: SUPABASE_URL).
+   * לוקחים רק את הדומיין, כך שגם כתובת עם תוספת (למשל /rest/v1) עובדת.
+   */
+  supabaseUrl: originOf(env.VITE_SUPABASE_URL),
 
   /** פרטי העסק — מופיעים בתקנון ובתחתית האתר. חובה למלא לפני עלייה לאוויר */
   business: {
